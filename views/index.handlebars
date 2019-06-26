@@ -1,0 +1,16 @@
+<div id="BrandLogo"></div>
+<div class="content">
+    <div class="section">
+        <p>Welcome {{user.given_name}}.</p>
+    </div>
+
+    <div class="section">
+        <h1>Phone Number</h1>
+        <p>Your registered phone number is {{phone_number}}.</p>
+        <form action="./updatePhone" method="POST">
+            <input type="text" name="number" value="{{phone_number}}"></input>
+            <button type="submit">Submit</button>
+        </form>
+        
+    </div>
+</div>
