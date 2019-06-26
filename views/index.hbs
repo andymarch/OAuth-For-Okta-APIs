@@ -1,16 +1,12 @@
 <div id="BrandLogo"></div>
 <div class="content">
     <div class="section">
-        <p>Welcome {{user.given_name}}.</p>
+        <p>Welcome {{user.name}}. You last logged in {{user.lastLogin}}</p
     </div>
 
     <div class="section">
-        <h1>Phone Number</h1>
-        <p>Your registered phone number is {{phone_number}}.</p>
-        <form action="./updatePhone" method="POST">
-            <input type="text" name="number" value="{{phone_number}}"></input>
-            <button type="submit">Submit</button>
-        </form>
-        
+        <h1>Your Profile</h1>
+        <p>Your registered phone number is {{user.phoneNumber}}.</p>
+        <a href="./editProfile" class="button">edit</a>
     </div>
 </div>

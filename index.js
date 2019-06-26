@@ -4,8 +4,9 @@ const hbs  = require('express-handlebars')
 const session = require("express-session")
 const axios = require("axios")
 const ExpressOIDC = require("@okta/oidc-middleware").ExpressOIDC
-var bodyParser = require('body-parser')
-var urlencodedParser = bodyParser.urlencoded({ extended: true });
+const bodyParser = require('body-parser')
+const urlencodedParser = bodyParser.urlencoded({ extended: true });
+const UserProfile = require('./models/userprofile')
 
 const PORT = process.env.PORT || "3000";
 
@@ -41,24 +42,37 @@ app.use(oidc.router);
 
 const router = express.Router();
 router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
-    var phoneNumber = "no value"
+    var userProfile;
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        const response = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
-        phoneNumber = response.data.profile.mobilePhone
+        response = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
+        userProfile = new UserProfile(response.data)
     }
     catch(error) {
         console.log(error);
     }
     res.render("index",{
-        user: req.userContext.userinfo,
-        phone_number: phoneNumber,
-        userString: JSON.stringify(req.userContext.userinfo)
+        user: userProfile
        });
 });
 
-router.post("/updatePhone",oidc.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
+router.get("/editprofile",oidc.ensureAuthenticated(), async (req, res, next) => {
+    const tokenSet = req.userContext.tokens;
+    axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
+    try {
+        const response = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
+        userProfile = new UserProfile(response.data)
+    }
+    catch(error) {
+        console.log(error);
+    }
+    res.render("editprofile",{
+        user: userProfile
+       });
+});
+
+router.post("/editprofile",oidc.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
