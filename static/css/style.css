@@ -54,3 +54,30 @@ p {
     margin: 5px;
     text-align: center;
 }
+
+.beta {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    background-color: red;
+}
+
+#betanotice {
+    display: none;
+}
+
+#betanotice li{
+        list-style-type: none;
+        text-align: center;
+}
+
+.iconbutton {
+    cursor: pointer;
+    background: transparent;
+    box-shadow: 0px 0px 0px transparent;
+    border: 0px solid transparent;
+    text-shadow: 0px 0px 0px transparent;
+}

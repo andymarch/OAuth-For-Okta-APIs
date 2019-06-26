@@ -1,6 +1,6 @@
 require('dotenv').config()
 const express = require('express')
-const exphbs  = require('express-handlebars')
+const hbs  = require('express-handlebars')
 const session = require("express-session")
 const axios = require("axios")
 const ExpressOIDC = require("@okta/oidc-middleware").ExpressOIDC
@@ -9,10 +9,15 @@ var urlencodedParser = bodyParser.urlencoded({ extended: true });
 
 const PORT = process.env.PORT || "3000";
 
-const app = express();
-var hbs = exphbs.create();
-app.engine('handlebars', hbs.engine);
-app.set('view engine', 'handlebars');
+app = express();
+
+app.engine('hbs',  hbs( { 
+    extname: 'hbs', 
+    defaultLayout: 'main', 
+    layoutsDir: __dirname + '/views/layouts/',
+    partialsDir: __dirname + '/views/partials/'
+  } ) );
+app.set('view engine', 'hbs');
 
 app.use("/static", express.static("static"));
 

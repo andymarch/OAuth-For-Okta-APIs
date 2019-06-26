@@ -1,0 +1,30 @@
+<div class="beta">
+    <button class="iconbutton" onclick="swapBetaNotice()">
+        <i class="fas fa-flask"></i>
+        Beta
+        <i class="fas fa-caret-down"></i>
+    </button>
+<div id="betanotice">
+    <p>
+        This is beta functionality and is subject to change.
+    If this demo stops working for any reason please create an issue on the
+    GitHub project.
+    </p>
+    <p>
+        The following feature flags are required to be enabled on your tenant for this demonstrator:
+    </p>
+    <ul>
+        <li>OAUTH2_FOR_OKTA_API</li>
+    </ul>
+</div>
+</div>
+<script>
+    function swapBetaNotice(){
+        var x = document.getElementById("betanotice");
+        if (x.style.display === "block") {
+            x.style.display = "none";
+        } else {
+            x.style.display = "block";
+        }
+        }
+</script>
