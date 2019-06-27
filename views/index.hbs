@@ -9,4 +9,12 @@
         <p>Your registered phone number is {{user.phoneNumber}}.</p>
         <a href="./editProfile" class="button">edit</a>
     </div>
+
+    <div class="section">
+        <h1>Your Teams</h1>
+        {{#each groups}}
+        {{this.name}}
+        <a href="./addTeamMember/{{this.id}}" class="button">Add team member</a>
+        {{/each}}
+    </div>
 </div>

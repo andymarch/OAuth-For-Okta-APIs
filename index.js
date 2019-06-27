@@ -7,6 +7,7 @@ const ExpressOIDC = require("@okta/oidc-middleware").ExpressOIDC
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: true });
 const UserProfile = require('./models/userprofile')
+const GroupProfile = require('./models/groupprofile')
 
 const PORT = process.env.PORT || "3000";
 
@@ -46,14 +47,21 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        response = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
-        userProfile = new UserProfile(response.data)
+        userres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
+        userProfile = new UserProfile(userres.data)
+
+        groupres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub+'/groups')
+        userManagedGroups = []
+        groupres.data.forEach(function(element) {
+            userManagedGroups.push(groupProfile = new GroupProfile(element))
+        });
     }
     catch(error) {
         console.log(error);
     }
     res.render("index",{
-        user: userProfile
+        user: userProfile,
+        groups:userManagedGroups
        });
 });
 
@@ -79,6 +87,36 @@ router.post("/editprofile",oidc.ensureAuthenticated(), urlencodedParser, async (
         const response = await axios.post(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub,
         {
             profile: {mobilePhone: req.body.number}
+        })
+        res.redirect("/")
+    }
+    catch(error) {
+        console.log(error);
+    }
+});
+
+router.get("/addTeamMember/:groupId",oidc.ensureAuthenticated(), async (req, res, next) => {
+    res.render("addTeamMember",{
+        user: new UserProfile(),
+        groupId: req.params.groupId
+       });
+});
+
+router.post("/addTeamMember/:groupId",oidc.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
+    const tokenSet = req.userContext.tokens;
+    axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
+    try {
+        const response = await axios.post(process.env.TENANT+'/api/v1/users?activate=true',
+        {
+            profile: { 
+                firstName: req.body.name.split(" ")[0],
+                lastName: req.body.name.split(" ")[1],
+                email: req.body.email,
+                login: req.body.email
+            },
+            groupIds: [
+                req.params.groupId
+            ]
         })
         res.redirect("/")
     }
