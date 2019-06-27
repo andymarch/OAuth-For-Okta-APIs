@@ -41,10 +41,34 @@ let oidc = new ExpressOIDC({
   
 app.use(oidc.router);
 
+function parseJWT (token){
+    var atob = require('atob');
+    if (token != null) {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace('-', '+').replace('_', '/');
+        return JSON.parse(atob(base64))
+    } else {
+        return "Invalid or empty token was parsed"
+    }
+}
+
+function wasDownscoped(scopes){
+    var result = false;
+    process.env.SCOPES.split(" ").forEach(element => {
+        if(!scopes.includes(element)){
+            result = true
+        }
+    });
+    return result;
+}
+
 const router = express.Router();
 router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
+
     var userProfile;
     const tokenSet = req.userContext.tokens;
+    const scopes = parseJWT(tokenSet.access_token).scp
+    var userDownscoped = wasDownscoped(scopes)
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
         userres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
@@ -61,7 +85,10 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
     }
     res.render("index",{
         user: userProfile,
-        groups:userManagedGroups
+        groups:userManagedGroups,
+        requestedScopes: process.env.SCOPES.split(" "),
+        grantedScopes: scopes,
+        wasDownscoped: userDownscoped
        });
 });
 

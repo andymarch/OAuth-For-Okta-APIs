@@ -1,7 +1,21 @@
 <div id="BrandLogo"></div>
 <div class="content">
     <div class="section">
-        <p>Welcome {{user.name}}. You last logged in {{user.lastLogin}}</p
+        <p>Welcome {{user.name}}. You last logged in {{user.lastLogin}}</p>
+    </div>
+
+    <div class="section">
+        <h2>Requested Scopes</h2>
+        {{requestedScopes}}
+        <h2>Granted Scopes</h2>
+        {{grantedScopes}}
+
+        <p>
+        {{#if wasDownscoped}}
+            Your token was downscoped to match your available permissions, some
+            functions may be unavailable to you.
+        {{/if}}
+        </p>
     </div>
 
     <div class="section">
