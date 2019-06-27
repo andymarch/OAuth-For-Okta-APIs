@@ -4,31 +4,58 @@
         <p>Welcome {{user.name}}. You last logged in {{user.lastLogin}}</p>
     </div>
 
+    {{#if wasDownscoped}}
     <div class="section">
+        <h1>Downscoped</h1>
+        <p>
+            Your token was downscoped to match your available permissions, some
+        functions may be unavailable to you.
+        </p>
         <h2>Requested Scopes</h2>
         {{requestedScopes}}
         <h2>Granted Scopes</h2>
         {{grantedScopes}}
 
-        <p>
-        {{#if wasDownscoped}}
-            Your token was downscoped to match your available permissions, some
-            functions may be unavailable to you.
-        {{/if}}
+        <ul>
+            {{#each downscopeNotices}}
+                <li>{{this}}</li>
+            {{/each}}
+        </ul>
         </p>
     </div>
+    {{/if}}
 
     <div class="section">
         <h1>Your Profile</h1>
         <p>Your registered phone number is {{user.phoneNumber}}.</p>
-        <a href="./editProfile" class="button">edit</a>
+        <form action="./editProfile">
+            <input type="submit" value="Edit" />
+        </form>
     </div>
 
     <div class="section">
         <h1>Your Teams</h1>
         {{#each groups}}
-        {{this.name}}
-        <a href="./addTeamMember/{{this.id}}" class="button">Add team member</a>
+            <div> 
+                <p>{{this.name}}</p>
+                <div>
+                    <form action="./addTeamMember/{{this.id}}">
+                        <input type="submit" value="New Team Member" />
+                    </form>
+                </div>
+            </div>
         {{/each}}
+    </div>
+
+    <div class="section">
+        <h1>Your Applications</h1>
+        {{#each applications}}
+            <div>
+                {{this.name}}
+            </div>
+        {{/each}}
+        <form action="./addApplication">
+            <input type="submit" value="New Application" />
+        </form>
     </div>
 </div>

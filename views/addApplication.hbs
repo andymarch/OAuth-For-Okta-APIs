@@ -1,0 +1,22 @@
+<div id="BrandLogo"></div>
+<div class="content">
+    <div class="section">
+        <h1>Add Application</h1>
+        <form action="/addApplication" method="POST">
+        <input type="hidden" value="{{groupId}}"/>
+            <div class="section">
+                <label for="name">Client Name</label>
+                <input type="text" name="clientName" value={{clientName}}></input>
+                <label for="uri">Application Base URI</label>
+                <input type="text" name="uri" value={{uri}}></input>
+            </div>
+            <div>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+        <div>
+            {{error}}
+        </div>
+        
+    </div>
+</div>
