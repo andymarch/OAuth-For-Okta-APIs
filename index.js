@@ -76,13 +76,13 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
         userres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
         userProfile = new UserProfile(userres.data)
 
+        var userManagedGroups = []
         groupres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub+'/groups')
-        userManagedGroups = []
         groupres.data.forEach(function(element) {
             userManagedGroups.push(new GroupProfile(element))
         });
 
-        userManagedApplications = []
+        var userManagedApplications = []
         if(scopes.includes("okta.clients.read")){
             appres = await axios.get(process.env.TENANT+'/oauth2/v1/clients')
             appres.data.forEach(function(element) {
@@ -125,7 +125,7 @@ router.post("/editprofile",oidc.ensureAuthenticated(), urlencodedParser, async (
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        const response = await axios.post(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub,
+        await axios.post(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub,
         {
             profile: {mobilePhone: req.body.number}
         })
@@ -147,7 +147,7 @@ router.post("/addTeamMember/:groupId",oidc.ensureAuthenticated(), urlencodedPars
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        const response = await axios.post(process.env.TENANT+'/api/v1/users?activate=true',
+        await axios.post(process.env.TENANT+'/api/v1/users?activate=true',
         {
             profile: { 
                 firstName: req.body.name.split(" ")[0],
@@ -162,7 +162,11 @@ router.post("/addTeamMember/:groupId",oidc.ensureAuthenticated(), urlencodedPars
         res.redirect("/")
     }
     catch(error) {
-        console.log(error);
+        res.render("addTeamMember",{
+            user: new UserProfile(),
+            groupId: req.params.groupId,
+            error: error.response.data.error_description
+           });
     }
 });
 
@@ -175,7 +179,7 @@ router.post("/addApplication",oidc.ensureAuthenticated(), urlencodedParser, asyn
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        const response = await axios.post(process.env.TENANT+'/oauth2/v1/clients',
+        await axios.post(process.env.TENANT+'/oauth2/v1/clients',
         {
             client_name: req.body.clientName,
             client_uri: req.body.uri,
