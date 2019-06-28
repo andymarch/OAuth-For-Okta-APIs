@@ -29,7 +29,7 @@
         <h1>Your Profile</h1>
         <p>Your registered phone number is {{user.phoneNumber}}.</p>
         <form action="/editProfile">
-            <input type="submit" value="Edit" />
+            <input type="submit" class="btn-positive" value="Edit" />
         </form>
     </div>
 
@@ -40,7 +40,7 @@
                 <p>{{this.name}}</p>
                 <div>
                     <form action="/addTeamMember/{{this.id}}">
-                        <input type="submit" value="New Team Member" />
+                        <input type="submit" class="btn-positive" value="New Team Member" />
                     </form>
                 </div>
             </div>
@@ -55,7 +55,7 @@
             </div>
         {{/each}}
         <form action="/addApplication">
-            <input type="submit" value="New Application" />
+            <input type="submit" class="btn-positive"  value="New Application" />
         </form>
     </div>
 </div>
