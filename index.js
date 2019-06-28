@@ -79,6 +79,10 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
         userres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
+
+        console.log("the user info is: ")
+        console.dir(userres)
+
         userProfile = new UserProfile(userres.data)
 
         var userManagedGroups = []
