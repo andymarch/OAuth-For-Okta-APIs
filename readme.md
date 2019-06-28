@@ -2,14 +2,12 @@
 
 This demonstrator allows you to explore the new OAuth for Okta APIs feature.
 
-## Environment
-
 ---
 **NOTE**
 
-We are overscoping for profile update here. We are granting users of this server user.read and
-user.manage when we want to be appending this with .self. However this is not
-currently available in beta.
+We are overscoping for profile update here. We are granting users of this server
+ user.read and user.manage when we want to be appending this with .self. 
+ However this is not currently available in beta.
 
 ---
 
@@ -22,7 +20,8 @@ currently available in beta.
 
 ### 101.0
 
-1. Get an oktapreview tenant. Ensure your tenant is configured with the flag ```OAUTH2_FOR_OKTA_API```
+1. Get an oktapreview tenant. Ensure your tenant is configured with the flag 
+```OAUTH2_FOR_OKTA_API```
 
 <!-- UDP magic goes here --->
 
@@ -36,7 +35,8 @@ currently available in beta.
 
 1. Clone this repository.
 
-1. Create a .env file at the root level of this project with the following content:
+1. Create a .env file at the root level of this project with the following 
+content:
 
 ```
 TENANT=https://<yourtentant>.oktapreview.com
@@ -49,15 +49,16 @@ PORT=3000
 SCOPES=openid profile okta.users.read okta.users.manage
 ```
 
-> Note that in this lab, the token issuer is the root tenant authz server. The okta.*
-scopes are only exposed on this authz server, and are not available from custom
-authz servers.
+> Note that in this lab, the token issuer is the root tenant authz server. The 
+okta.* scopes are only exposed on this authz server, and are not available from 
+custom authz servers.
    
 1. To install the npm package dependencies enter ```npm install```.
 
 1. To start the application enter ```npm run start```.
 
-1. Open a browser in private or incognito mode and navigate to http://localhost:3000.
+1. Open a browser in private or incognito mode and navigate to 
+http://localhost:3000.
 
 1. You will be prompted to login to your tenant if you are not already. You should
 do this as a user with super admin permission.
@@ -101,7 +102,8 @@ This exercise demonstrates delegated administration. This will allow for the
 development of custom management dashboard still bound by the rights granted to
 the user within Okta.
 
-1. Login to your tenant as a super user and create a new group called "Development".
+1. Login to your tenant as a super user and create a new group called 
+"Development".
 
 1. Create a new user with naming of your choice and assign them to this group.
 
@@ -128,14 +130,63 @@ the user within Okta.
 
 ### 101.3
 
-Application administrator
+   This excerise demonstrates application management and the control of user
+   permissions driven by Okta's permission model.
+
+1. Open the demonstrator as your test account.
+
+1. Under applications press "New Application"
+
+1. Complete the form and press submit.
+
+1. You will be shown an error. While your token has the scope to register new 
+clients your user does not.
+
+1. Login to the tenant as a super user and grant the test account application 
+administrator.
+
+1. Repeat the form submission for creating a new application.
+
+1. You should see the newly created application listed under your applications.
 
 ## 201
 
 - Complete 101 first.
 
-Do a branding swap
+### 201.1
 
-extend the "your profile" call to update a custom profile attribute.
+   This exercise should allow you to quickly update the branding to provide
+   customized demonstrations to customer.
 
-add lifecycle events to the the "your teams" view.
+1. Using the css file in ```/static/css/style.css``` update the brandlogo shown.
+
+2. Change the background colour.
+
+### 202.2
+
+   This exercise will help you to add custom logic to your delegated
+   administration sample.
+
+   1. Add an additional field to the user profile page which updates a custom
+      attribute on the user profile.
+
+    2. Add custom validation logic on your field in the application and prevent
+       submission to Okta if validation is not met.
+
+### 202.3
+
+   THis exercise should familize you with the progress being made, where to find
+   updates as to which endpoints are covered and how to extend the demo to use
+   them.
+   
+   1. Visit the wiki page for OAuth for Okta APIs and review the endpoint status
+      [here](https://oktawiki.atlassian.net/wiki/spaces/eng/pages/571380965/OAuth+2.0+for+Okta+APIs#OAuth2.0forOktaAPIs-EndpointStatus(Tobeupdatedbyproductteams)).
+      
+   1. Pick an endpoint besides user or client. (Currently live are
+      apps/authorizationServerss/eventHooks/groups/schemas)
+   
+   1. Add the required scopes to your application grants.
+
+   1. Add the required scopes to your .env file.
+
+   1. Add an additional screen to interact with that endpoint.
