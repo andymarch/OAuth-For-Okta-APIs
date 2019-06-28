@@ -18,7 +18,12 @@ app.engine('hbs',  hbs( {
     extname: 'hbs', 
     defaultLayout: 'main', 
     layoutsDir: __dirname + '/views/layouts/',
-    partialsDir: __dirname + '/views/partials/'
+    partialsDir: __dirname + '/views/partials/',
+    helpers: {
+        betaTagged: () => {
+            return !process.env.SUPPRESSBETA;
+        }
+    }
   } ) );
 app.set('view engine', 'hbs');
 
