@@ -4,8 +4,6 @@ This demonstrator allows you to explore the new OAuth for Okta APIs feature.
 
 ## Environment
 
-
-
 ---
 **NOTE**
 
@@ -46,12 +44,17 @@ SCOPES=openid profile okta.users.read okta.users.manage
 scopes are only exposed on this auth server and are not available from custom
 authz servers.
 
+1. login to the tenant admin and create an oauth app
+
+1. In the application page you will see a new tab "Okta API Scopes", click this
+   and enable the following scopes: openid profile okta.users.read okta.users.manage okta.clients.read okta.clients.register 
+
 1. To start the application enter ```npm run start```.
 
 1. Open a browser in private or incognito mode and navigate to http://localhost:3000.
 
 1. You will be prompted to login to your tenant if you are not already. You should
-do this as a user with super user permission.
+do this as a user with super admin permission.
 
 ### 101.1
 
@@ -60,13 +63,33 @@ developers to enable user's to manage their profile directly in an application
 with the goal of making this available to SPA (single page applications) where
 API tokens cannot be safely used.
 
-1. Under your profile select 'Edit' update your phone number and press submit.
+1. Whilst logged to the demo application as super admin. Select 'Edit' under
+   your profile an update your phone number and press submit.
 
 1. Verify that the number shown under your profile changes.
 
-1. Open the system log in the admin console and verify you see an event of type  ```user.account.update_profile```.
+1. Open the system log in the admin console and verify you see an event of type
+   ```user.account.update_profile```.
 
 ### 101.2
+
+   This excercise demonstrates silent downscoping. The actions available to a
+   user with their bearer token depend on the scopes granted to that
+   application.
+   
+1. Open the tenant administration console and switch to the application you
+      created in 101.1.
+
+1. From the "Okta API Scopes" tab revoke the ```okta.users.manage``` scope.
+
+1. Launch the demonstrator again as the same user as before. You should now
+      see a downscope warning listing the requested scopes and the granted
+      scopes.
+
+   1. Try to update the user's phone number as done in 101.1 you will now see
+      and error that insufficient scopes are granted.
+
+### 101.3
 
 This exercise demonstrates delegated administration. This will allow for the
 development of custom management dashboard still bound by the rights granted to
