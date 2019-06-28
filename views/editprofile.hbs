@@ -2,7 +2,7 @@
 <div class="content">
     <div class="section">
         <h1>Update Your Profile</h1>
-        <form action="./editprofile" method="POST">
+        <form action="/editprofile" method="POST">
             <div class="section">
                 <label for="number">Phone Number</label>
                 <input type="text" name="number" value="{{user.phoneNumber}}"></input>
@@ -12,10 +12,12 @@
             </div>
         </form>
         <div>
-            <form action="./">
+            <form action="/">
                 <input type="submit" value="Cancel" />
             </form>
         </div>
-        
+    </div>
+    <div class="section errorMsg">
+        {{error}}
     </div>
 </div>

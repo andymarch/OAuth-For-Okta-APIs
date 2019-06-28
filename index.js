@@ -6,6 +6,7 @@ const axios = require("axios")
 const ExpressOIDC = require("@okta/oidc-middleware").ExpressOIDC
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: true });
+
 const UserProfile = require('./models/userprofile')
 const GroupProfile = require('./models/groupprofile')
 const AppProfile = require('./models/appprofile')
@@ -122,8 +123,9 @@ router.get("/editprofile",oidc.ensureAuthenticated(), async (req, res, next) => 
         console.log(error);
     }
     res.render("editprofile",{
-        user: userProfile
-       });
+        user: userProfile,
+        error: req.query.error
+    });
 });
 
 router.post("/editprofile",oidc.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
@@ -137,7 +139,11 @@ router.post("/editprofile",oidc.ensureAuthenticated(), urlencodedParser, async (
         res.redirect("/")
     }
     catch(error) {
-        console.log(error);
+        var error_description_pattern = /.*error_description=\"([^\"]+)\",.*/
+        var scope_pattern = /.*scope=\"([^\"]+)\".+/
+        var des = error.response.headers['www-authenticate'].match(error_description_pattern)[1]
+        var scopeRequired = error.response.headers['www-authenticate'].match(scope_pattern)[1]
+        res.redirect("/editprofile/?error="+encodeURIComponent(des+ " Required Scope: "+scopeRequired)) 
     }
 });
 

@@ -28,7 +28,7 @@
     <div class="section">
         <h1>Your Profile</h1>
         <p>Your registered phone number is {{user.phoneNumber}}.</p>
-        <form action="./editProfile">
+        <form action="/editProfile">
             <input type="submit" value="Edit" />
         </form>
     </div>
@@ -39,7 +39,7 @@
             <div> 
                 <p>{{this.name}}</p>
                 <div>
-                    <form action="./addTeamMember/{{this.id}}">
+                    <form action="/addTeamMember/{{this.id}}">
                         <input type="submit" value="New Team Member" />
                     </form>
                 </div>
@@ -54,7 +54,7 @@
                 {{this.name}}
             </div>
         {{/each}}
-        <form action="./addApplication">
+        <form action="/addApplication">
             <input type="submit" value="New Application" />
         </form>
     </div>
