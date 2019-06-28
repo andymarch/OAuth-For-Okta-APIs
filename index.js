@@ -69,7 +69,21 @@ function wasDownscoped(scopes){
     return result;
 }
 
+function parse403(error){
+    if(error.response.headers['www-authenticate']){
+        var error_description_pattern = /.*error_description=\"([^\"]+)\",.*/
+        var scope_pattern = /.*scope=\"([^\"]+)\".+/
+        var des = error.response.headers['www-authenticate'].match(error_description_pattern)[1]
+        var scopeRequired = error.response.headers['www-authenticate'].match(scope_pattern)[1]
+        return des+ " Required Scope: "+scopeRequired
+    } else{
+        return error.response.data.error_description
+    }
+}
+
 const router = express.Router();
+
+
 router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
 
     var userProfile;
@@ -80,6 +94,10 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
         userres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
+
+        console.log("the user info is: ")
+        console.dir(userres)
+
         userProfile = new UserProfile(userres.data)
 
         var userManagedGroups = []
@@ -120,7 +138,7 @@ router.get("/editprofile",oidc.ensureAuthenticated(), async (req, res, next) => 
         userProfile = new UserProfile(response.data)
     }
     catch(error) {
-        console.log(error);
+        console.error(error);
     }
     res.render("editprofile",{
         user: userProfile,
@@ -139,11 +157,13 @@ router.post("/editprofile",oidc.ensureAuthenticated(), urlencodedParser, async (
         res.redirect("/")
     }
     catch(error) {
-        var error_description_pattern = /.*error_description=\"([^\"]+)\",.*/
-        var scope_pattern = /.*scope=\"([^\"]+)\".+/
-        var des = error.response.headers['www-authenticate'].match(error_description_pattern)[1]
-        var scopeRequired = error.response.headers['www-authenticate'].match(scope_pattern)[1]
-        res.redirect("/editprofile/?error="+encodeURIComponent(des+ " Required Scope: "+scopeRequired)) 
+        if(error.response.status === 403){
+            res.redirect("/editprofile/?error="+encodeURIComponent(parse403(error))) 
+        }
+        else {
+            console.log(error)
+            res.redirect("/editprofile/?error="+encodeURIComponent("Unknown error, check console"))
+        }
     }
 });
 
@@ -173,10 +193,18 @@ router.post("/addTeamMember/:groupId",oidc.ensureAuthenticated(), urlencodedPars
         res.redirect("/")
     }
     catch(error) {
+        var errorMsg;
+        if(error.response.status === 403){
+            errorMsg = parse403(error)
+        }
+        else {
+            console.error(error)
+            errorMsg = "Unknown error, check console";
+        }
         res.render("addTeamMember",{
             user: new UserProfile(),
             groupId: req.params.groupId,
-            error: error.response.data.error_description
+            error: errorMsg
            });
     }
 });
@@ -215,10 +243,19 @@ router.post("/addApplication",oidc.ensureAuthenticated(), urlencodedParser, asyn
         res.redirect("/")
     }
     catch(error) {
+        var errorMsg;
+        if(error.response.status === 403){
+            errorMsg = parse403(error)
+        }
+        else {
+            console.error(error)
+            errorMsg = "Unknown error, check console";
+        }
+
         res.render("addApplication",{
             clientName: req.body.clientName,
             uri: req.body.uri,
-            error: error.response.data.error_description
+            error: errorMsg
         });
     }
 });
