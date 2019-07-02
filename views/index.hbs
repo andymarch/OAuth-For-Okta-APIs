@@ -1,18 +1,27 @@
 <div id="BrandLogo"></div>
 <div class="content">
     <div class="section">
-        <p>Welcome {{user.name}}. You last logged in {{user.lastLogin}}</p>
+        <p>Welcome, {{user.name}}! You last logged in {{user.lastLogin}}.</p>
     </div>
 
     {{#if wasDownscoped}}
     <div class="section">
         <h1>Downscoped</h1>
         <p>
-        Your token was downscoped to match your applications available 
-        permissions, some functions may be unavailable to you.
+        Your access token was downscoped to match your application's available 
+        permissions, so some functions may be unavailable to you.
         </p>
         <h2>Requested Scopes</h2>
-        {{requestedScopes}}
+
+
+        <table border = 1>
+            <tr><th>scope</th><th>granted?</th>
+        {{#each authorizations}}
+            <tr><td>{{@key}}</td><td>{{.}}</td></tr>
+        {{/each}}
+        </table>
+
+{{!--         {{requestedScopes}}
         <h2>Granted Scopes</h2>
         {{grantedScopes}}
 
@@ -21,7 +30,7 @@
                 <li>{{this}}</li>
             {{/each}}
         </ul>
-        </p>
+        </p> --}}
     </div>
     {{/if}}
 
@@ -58,4 +67,13 @@
             <input type="submit" class="btn-positive"  value="New Application" />
         </form>
     </div>
+
+    <div class="section">
+        <h1>kill session</h1>
+
+        <form action="/killSession" method="post">
+            <input type="submit" class="btn-positive" value="kill session" />
+        </form>
+    </div>
+
 </div>

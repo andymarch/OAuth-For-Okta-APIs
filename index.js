@@ -1,9 +1,9 @@
 require('dotenv').config()
 const express = require('express')
 const hbs  = require('express-handlebars')
-const session = require("express-session")
-const axios = require("axios")
-const ExpressOIDC = require("@okta/oidc-middleware").ExpressOIDC
+const session = require('express-session')
+const axios = require('axios')
+const ExpressOIDC = require('@okta/oidc-middleware').ExpressOIDC
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: true });
 
@@ -11,7 +11,7 @@ const UserProfile = require('./models/userprofile')
 const GroupProfile = require('./models/groupprofile')
 const AppProfile = require('./models/appprofile')
 
-const PORT = process.env.PORT || "3000";
+const PORT = process.env.PORT || 3000;
 
 app = express();
 
@@ -26,9 +26,10 @@ app.engine('hbs',  hbs( {
         }
     }
   } ) );
+
 app.set('view engine', 'hbs');
 
-app.use("/static", express.static("static"));
+app.use('/static', express.static('static'));
 
 app.use(session({
   cookie: { httpOnly: true },
@@ -43,7 +44,8 @@ let oidc = new ExpressOIDC({
     client_secret: process.env.CLIENT_SECRET,
     appBaseUrl: process.env.BASE_URI,
     redirect_uri: process.env.REDIRECT_URI,
-    scope: process.env.SCOPES
+    scope: process.env.SCOPES,
+    logoutRedirectUri: process.env.BASE_URI
 });
   
 app.use(oidc.router);
@@ -83,7 +85,6 @@ function parse403(error){
 
 const router = express.Router();
 
-
 router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
 
     var userProfile;
@@ -115,11 +116,27 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
         } else {
             downscopeNotices.push("okta.clients.read was not granted")
         }
-    }
-    catch(error) {
-        console.log(error);
-    }
+
+        }
+        catch(error) {
+            console.log(error);
+        }
+
+    var authorizations = {}
+
+    var requestedScopes = process.env.SCOPES.split(" ")
+
+    requestedScopes.forEach(function (req_scope, index) {
+        if (scopes.includes(req_scope)) {
+            authorizations[req_scope] = true
+        }
+        else {
+            authorizations[req_scope] = false
+        }
+    });
+
     res.render("index",{
+        authorizations: authorizations,
         user: userProfile,
         groups:userManagedGroups,
         applications: userManagedApplications,
@@ -127,7 +144,8 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
         grantedScopes: scopes,
         wasDownscoped: userDownscoped,
         downscopeNotices: downscopeNotices
-       });
+    });
+
 });
 
 router.get("/editprofile",oidc.ensureAuthenticated(), async (req, res, next) => {
@@ -257,6 +275,21 @@ router.post("/addApplication",oidc.ensureAuthenticated(), urlencodedParser, asyn
             uri: req.body.uri,
             error: errorMsg
         });
+    }
+});
+
+router.post("/killSession", urlencodedParser, async (req, res, next) => {
+    axios.defaults.headers.common['Authorization'] = 'SSWS ' + process.env.API_TOKEN
+
+    try {
+        await axios.delete(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub+'/sessions', {})
+
+            req.session.destroy(function(err) {
+                res.redirect("/")
+            })
+    }
+    catch(error) {
+        console.log(error)
     }
 });
 
