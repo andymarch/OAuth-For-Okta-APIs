@@ -14,23 +14,12 @@
         <h2>Requested Scopes</h2>
 
 
-        <table border = 1>
-            <tr><th>scope</th><th>granted?</th>
+        <table>
+            <tr><th>Scope</th><th>Granted</th>
         {{#each authorizations}}
             <tr><td>{{@key}}</td><td>{{.}}</td></tr>
         {{/each}}
         </table>
-
-{{!--         {{requestedScopes}}
-        <h2>Granted Scopes</h2>
-        {{grantedScopes}}
-
-        <ul>
-            {{#each downscopeNotices}}
-                <li>{{this}}</li>
-            {{/each}}
-        </ul>
-        </p> --}}
     </div>
     {{/if}}
 
@@ -69,10 +58,10 @@
     </div>
 
     <div class="section">
-        <h1>kill session</h1>
+        <h1>Logout</h1>
 
-        <form action="/killSession" method="post">
-            <input type="submit" class="btn-positive" value="kill session" />
+        <form action="/logout">
+            <input type="submit" class="btn-positive" value="Logout" />
         </form>
     </div>
 

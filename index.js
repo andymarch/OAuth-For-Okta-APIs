@@ -278,24 +278,14 @@ router.post("/addApplication",oidc.ensureAuthenticated(), urlencodedParser, asyn
     }
 });
 
-router.post("/killSession", urlencodedParser, async (req, res, next) => {
-    axios.defaults.headers.common['Authorization'] = 'SSWS ' + process.env.API_TOKEN
-
-    try {
-        await axios.delete(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub+'/sessions', {})
-
-            req.session.destroy(function(err) {
-                res.redirect("/")
-            })
-    }
-    catch(error) {
-        console.log(error)
-    }
-});
-
 app.get("/logout", (req, res) => {
+    const tokenSet = req.userContext.tokens;
     req.logout();
-    res.redirect("/");
+    res.redirect(process.env.TENANT+'/oauth2/v1/logout?id_token_hint='
+        + tokenSet.id_token
+        + '&post_logout_redirect_uri='
+        + encodeURI(process.env.BASE_URI)
+        );
 });
 
 app.use(router)

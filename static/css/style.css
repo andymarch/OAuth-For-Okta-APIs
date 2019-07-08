@@ -34,6 +34,7 @@ html, body, .viewport {
     justify-content: center;
     align-items: center;
     font-weight: lighter;
+    padding-bottom: 10px;
 }
 
 p {
@@ -118,4 +119,12 @@ label{
 
 .errorMsg {
     color: red;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th, td {
+    border-bottom: 1px solid #d2d2d6;
 }
