@@ -123,6 +123,7 @@ label{
 
 table {
     border-collapse: collapse;
+    text-align: center;
 }
 
 th, td {
