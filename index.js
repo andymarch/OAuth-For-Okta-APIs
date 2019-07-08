@@ -38,7 +38,7 @@ app.use(session({
   resave: true
 }));
 
-let oidc = new ExpressOIDC({
+const oidc = new ExpressOIDC({
     issuer: process.env.TENANT,
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,
@@ -91,14 +91,9 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
     const tokenSet = req.userContext.tokens;
     const scopes = parseJWT(tokenSet.access_token).scp
     var userDownscoped = wasDownscoped(scopes)
-    var downscopeNotices = []
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
         userres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
-
-        console.log("the user info is: ")
-        console.dir(userres)
-
         userProfile = new UserProfile(userres.data)
 
         var userManagedGroups = []
@@ -113,17 +108,14 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
             appres.data.forEach(function(element) {
                 userManagedApplications.push(new AppProfile(element))
             });
-        } else {
-            downscopeNotices.push("okta.clients.read was not granted")
-        }
+        } 
 
-        }
-        catch(error) {
-            console.log(error);
-        }
+    }
+    catch(error) {
+        console.log(error);
+    }
 
     var authorizations = {}
-
     var requestedScopes = process.env.SCOPES.split(" ")
 
     requestedScopes.forEach(function (req_scope, index) {
@@ -142,8 +134,7 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
         applications: userManagedApplications,
         requestedScopes: process.env.SCOPES.split(" "),
         grantedScopes: scopes,
-        wasDownscoped: userDownscoped,
-        downscopeNotices: downscopeNotices
+        wasDownscoped: userDownscoped
     });
 
 });
@@ -154,14 +145,27 @@ router.get("/editprofile",oidc.ensureAuthenticated(), async (req, res, next) => 
     try {
         const response = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
         userProfile = new UserProfile(response.data)
+
+        res.render("editprofile",{
+            user: userProfile,
+            error: req.query.error
+        });
     }
     catch(error) {
-        console.error(error);
+        if(error.response.status === 403){
+            res.render("editprofile",{
+                user: new UserProfile(),
+                error: parse403(error)
+            });
+        }
+        else {
+            console.log(error)
+            res.render("editprofile",{
+                user: new UserProfile(),
+                error: "Unknown error, check console."
+            });
+        }
     }
-    res.render("editprofile",{
-        user: userProfile,
-        error: req.query.error
-    });
 });
 
 router.post("/editprofile",oidc.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
