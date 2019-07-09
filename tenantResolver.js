@@ -1,49 +1,63 @@
 const ExpressOIDC = require('@okta/oidc-middleware').ExpressOIDC
+const axios = require('axios')
+const Tenant = require('./models/tenant')
 
 class TenantResolver {
     constructor() {
-        //using this default tenant until able to retrieve from UDP
-        let oidc = new ExpressOIDC({
-            issuer: process.env.TENANT,
-            client_id: process.env.CLIENT_ID,
-            client_secret: process.env.CLIENT_SECRET,
-            appBaseUrl: process.env.BASE_URI,
-            redirect_uri: process.env.REDIRECT_URI,
-            scope: process.env.SCOPES,
-            logoutRedirectUri: process.env.BASE_URI
-        });
-        app.use(oidc.router);
-
         this.tenants = new Map([]);
-        this.tenants.set("",oidc)
+        this.tenants.set("",new Tenant("sdfdsfsdf"))
     }
 
     ensureAuthenticated(){
-        return (req, res, next) => {
+        return async (req, res, next) => {
             const subdomainPattern = /(.*)\..*(:[0-9]*)?/
             const matches = req.headers.host.match(subdomainPattern)
 
-            var oidc;
+            var tenant;
             if(matches != null){
-                const sub = [1]
+                const sub = matches[1]
                 if(this.tenants.has(sub)){
-                    oidc = this.tenants.get(sub)
+                    tenant = this.tenants.get(sub)
                 } else {
+                    try{
+                    var response = await axios.get(process.env.UDP_URI+"/api/config/"+sub+"/"+process.env.UDP_APP_NAME+"/.well-known/default-settings")
+                    console.log(response)
                     //TODO call UDP to get the tenant config
+                    }
+                    catch(error){
+                        console.log(error)
+                    }
                 }
             }
             else {
-                oidc = this.tenants.get("")
+                tenant = this.tenants.get("")
             }
-            if(oidc == null){
+            if(tenant == null){
                 return res.status(500).json({
                     Error: "Unable to determine tenant configuration."
                   });
             }
             var oldNext = next;
-            next = oidc.ensureAuthenticated()
+            next = tenant.oidc.ensureAuthenticated()
             next(req,res,oldNext)
         }
+    }
+
+    getRequestingTenant(req){
+        const subdomainPattern = /(.*)\..*(:[0-9]*)?/
+        const matches = req.headers.host.match(subdomainPattern)
+
+        var tenant;
+        if(matches != null){
+            const sub = matches[1]
+            if(this.tenants.has(sub)){
+                tenant = this.tenants.get(sub)
+            } 
+        }
+        else {
+            tenant = this.tenants.get("")
+        }
+        return tenant;
     }
 }
 

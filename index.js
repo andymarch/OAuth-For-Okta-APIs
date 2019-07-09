@@ -51,9 +51,9 @@ function parseJWT (token){
     }
 }
 
-function wasDownscoped(scopes){
+function wasDownscoped(scopes, requestedScopes){
     var result = false;
-    process.env.SCOPES.split(" ").forEach(element => {
+    requestedScopes.split(" ").forEach(element => {
         if(!scopes.includes(element)){
             result = true
         }
@@ -76,25 +76,26 @@ function parse403(error){
 const router = express.Router();
 
 router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
-
+    const requestingTenant = tr.getRequestingTenant(req);
     var userProfile;
     const tokenSet = req.userContext.tokens;
     const scopes = parseJWT(tokenSet.access_token).scp
-    var userDownscoped = wasDownscoped(scopes)
+    var userDownscoped = wasDownscoped(scopes,requestingTenant.scopes)
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
+
     try {
-        userres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
+        userres = await axios.get(requestingTenant.tenant+'/api/v1/users/'+req.userContext.userinfo.sub)
         userProfile = new UserProfile(userres.data)
 
         var userManagedGroups = []
-        groupres = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub+'/groups')
+        groupres = await axios.get(requestingTenant.tenant+'/api/v1/users/'+req.userContext.userinfo.sub+'/groups')
         groupres.data.forEach(function(element) {
             userManagedGroups.push(new GroupProfile(element))
         });
 
         var userManagedApplications = []
         if(scopes.includes("okta.clients.read")){
-            appres = await axios.get(process.env.TENANT+'/oauth2/v1/clients')
+            appres = await axios.get(requestingTenant.tenant+'/oauth2/v1/clients')
             appres.data.forEach(function(element) {
                 userManagedApplications.push(new AppProfile(element))
             });
@@ -106,7 +107,7 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
     }
 
     var authorizations = {}
-    var requestedScopes = process.env.SCOPES.split(" ")
+    var requestedScopes = requestingTenant.scopes.split(" ")
 
     requestedScopes.forEach(function (req_scope, index) {
         if (scopes.includes(req_scope)) {
@@ -122,7 +123,7 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
         user: userProfile,
         groups:userManagedGroups,
         applications: userManagedApplications,
-        requestedScopes: process.env.SCOPES.split(" "),
+        requestedScopes: requestedScopes,
         grantedScopes: scopes,
         wasDownscoped: userDownscoped
     });
@@ -133,7 +134,7 @@ router.get("/editprofile",tr.ensureAuthenticated(), async (req, res, next) => {
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        const response = await axios.get(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub)
+        const response = await axios.get(tr.getRequestingTenant(req).tenant+'/api/v1/users/'+req.userContext.userinfo.sub)
         userProfile = new UserProfile(response.data)
 
         res.render("editprofile",{
@@ -162,7 +163,7 @@ router.post("/editprofile",tr.ensureAuthenticated(), urlencodedParser, async (re
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        await axios.post(process.env.TENANT+'/api/v1/users/'+req.userContext.userinfo.sub,
+        await axios.post(tr.getRequestingTenant(req).tenant+'/api/v1/users/'+req.userContext.userinfo.sub,
         {
             profile: {mobilePhone: req.body.number}
         })
@@ -190,7 +191,7 @@ router.post("/addTeamMember/:groupId",tr.ensureAuthenticated(), urlencodedParser
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        await axios.post(process.env.TENANT+'/api/v1/users?activate=true',
+        await axios.post(tr.getRequestingTenant(req).tenant+'/api/v1/users?activate=true',
         {
             profile: { 
                 firstName: req.body.name.split(" ")[0],
@@ -230,7 +231,7 @@ router.post("/addApplication",tr.ensureAuthenticated(), urlencodedParser, async 
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        await axios.post(process.env.TENANT+'/oauth2/v1/clients',
+        await axios.post(tr.getRequestingTenant(req).tenant+'/oauth2/v1/clients',
         {
             client_name: req.body.clientName,
             client_uri: req.body.uri,
@@ -274,11 +275,12 @@ router.post("/addApplication",tr.ensureAuthenticated(), urlencodedParser, async 
 
 app.get("/logout", (req, res) => {
     const tokenSet = req.userContext.tokens;
+    console.log(req)
     req.logout();
-    res.redirect(process.env.TENANT+'/oauth2/v1/logout?id_token_hint='
+    res.redirect(tr.getRequestingTenant(req).tenant+'/oauth2/v1/logout?id_token_hint='
         + tokenSet.id_token
         + '&post_logout_redirect_uri='
-        + encodeURI(process.env.BASE_URI)
+        + encodeURI(req.protocol+"://"+req.headers.host)
         );
 });
 

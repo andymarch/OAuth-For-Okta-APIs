@@ -1,6 +1,5 @@
 class AppProfile {
     constructor(profileJson) {
-        console.log(profileJson)
         if(profileJson){
             try {
                 this.id = profileJson.client_id
