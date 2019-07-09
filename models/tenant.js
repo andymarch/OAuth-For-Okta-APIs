@@ -5,7 +5,6 @@ class Tenant {
         if(tenantProfileJson){
             try {
                 this.tenant = tenantProfileJson.okta_org_name
-                this.scopes = process.env.SCOPES
                 this.oidc = new ExpressOIDC({
                     issuer: tenantProfileJson.okta_org_name,
                     client_id: tenantProfileJson.client_id,
@@ -24,7 +23,6 @@ class Tenant {
         else {
             try {
                 this.tenant = process.env.TENANT
-                this.scopes = process.env.SCOPES
                 this.oidc = new ExpressOIDC({
                     issuer: process.env.TENANT,
                     client_id: process.env.CLIENT_ID,

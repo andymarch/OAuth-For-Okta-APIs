@@ -51,9 +51,9 @@ function parseJWT (token){
     }
 }
 
-function wasDownscoped(scopes, requestedScopes){
+function wasDownscoped(scopes){
     var result = false;
-    requestedScopes.split(" ").forEach(element => {
+    process.env.SCOPES.split(" ").forEach(element => {
         if(!scopes.includes(element)){
             result = true
         }
@@ -80,7 +80,7 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
     var userProfile;
     const tokenSet = req.userContext.tokens;
     const scopes = parseJWT(tokenSet.access_token).scp
-    var userDownscoped = wasDownscoped(scopes,requestingTenant.scopes)
+    var userDownscoped = wasDownscoped(scopes)
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
 
     try {
@@ -107,7 +107,7 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
     }
 
     var authorizations = {}
-    var requestedScopes = requestingTenant.scopes.split(" ")
+    var requestedScopes = process.env.SCOPES.split(" ")
 
     requestedScopes.forEach(function (req_scope, index) {
         if (scopes.includes(req_scope)) {
