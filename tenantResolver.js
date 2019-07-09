@@ -14,8 +14,9 @@ class TenantResolver {
             const matches = req.headers.host.match(subdomainPattern)
 
             var tenant;
+            let sub = ""
             if(matches != null){
-                const sub = matches[1]
+                sub = matches[1]
                 if(this.tenants.has(sub)){
                     console.log("Found known tenant")
                     tenant = this.tenants.get(sub)
@@ -33,7 +34,7 @@ class TenantResolver {
                 }
             }
             else {
-                tenant = this.tenants.get("")
+                tenant = this.tenants.get(sub)
             }
             if(tenant == null){
                 return res.status(500).json({
@@ -41,6 +42,12 @@ class TenantResolver {
                   });
             }
             var oldNext = next;
+            if(tenant.oidc == null){
+                this.tenants.delete(sub)
+                return res.status(500).json({
+                    Error: "Tenant configuration was malformed unable to configure middleware. Tenant will be removed, update configuration and retry."
+                  });
+            }
             next = tenant.oidc.ensureAuthenticated()
             next(req,res,oldNext)
         }
