@@ -10,35 +10,27 @@ class TenantResolver {
 
     ensureAuthenticated(){
         return async (req, res, next) => {
-            const subdomainPattern = /(.*)\..*(:[0-9]*)?/
-            const matches = req.headers.host.match(subdomainPattern)
-
             var tenant;
-            let sub = ""
-            if(matches != null){
-                sub = matches[1]
-                if(this.tenants.has(sub)){
-                    console.log("Found known tenant")
-                    tenant = this.tenants.get(sub)
-                } else {
-                    try{
-                        console.log("Consulting UDP for tenant info")
-                        var response = await axios.get(process.env.UDP_URI+"/api/configs/"+sub+"/"+process.env.UDP_APP_NAME)
-                        this.tenants.set(sub,new Tenant(response.data));
-                        tenant = this.tenants.get(sub)
-                        console.log("tenant stored")
-                    }
-                    catch(error){
-                        console.log(error)
-                    }
-                }
-            }
-            else {
+            //TODO fix this tangly mess
+            let sub = req.headers.host.substr(0,req.headers.host.indexOf("."+process.env.BASE_HOST))
+            if(this.tenants.has(sub)){
+                console.log("Found known tenant '"+sub+"'")
                 tenant = this.tenants.get(sub)
+            } else {
+                try{
+                    console.log("Consulting UDP for tenant info of "+sub)
+                    var response = await axios.get(process.env.UDP_URI+"/api/configs/"+sub+"/"+process.env.UDP_APP_NAME)
+                    this.tenants.set(sub,new Tenant(response.data));
+                    tenant = this.tenants.get(sub)
+                    console.log("tenant stored")
+                }
+                catch(error){
+                    console.log(error)
+                }
             }
             if(tenant == null){
                 return res.status(500).json({
-                    Error: "Unable to determine tenant configuration."
+                    Error: "Unable to determine tenant configuration for "+sub
                   });
             }
             var oldNext = next;
@@ -54,20 +46,8 @@ class TenantResolver {
     }
 
     getRequestingTenant(req){
-        const subdomainPattern = /(.*)\..*(:[0-9]*)?/
-        const matches = req.headers.host.match(subdomainPattern)
-
-        var tenant;
-        if(matches != null){
-            const sub = matches[1]
-            if(this.tenants.has(sub)){
-                tenant = this.tenants.get(sub)
-            } 
-        }
-        else {
-            tenant = this.tenants.get("")
-        }
-        return tenant;
+        let sub = req.headers.host.substr(0,req.headers.host.indexOf("."+process.env.BASE_HOST))
+        return this.tenants.get(sub)
     }
 }
 
