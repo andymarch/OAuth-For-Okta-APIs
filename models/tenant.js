@@ -4,9 +4,27 @@ class Tenant {
     constructor(tenantProfileJson) {
         if(tenantProfileJson){
             try {
-                this.sub = "test"
-                this.tenant = "https://examplydev.oktapreview.com"
-                this.scopes = "openid profile okta.users.read okta.users.manage okta.clients.read"
+                this.tenant = tenantProfileJson.okta_org_name
+                this.scopes = process.env.SCOPES
+                this.oidc = new ExpressOIDC({
+                    issuer: tenantProfileJson.okta_org_name,
+                    client_id: tenantProfileJson.client_id,
+                    client_secret: process.env.CLIENT_SECRET,
+                    appBaseUrl: tenantProfileJson.redirect_uri,
+                    redirect_uri: tenantProfileJson.redirect_uri,
+                    scope: process.env.SCOPES,
+                    logoutRedirectUri: process.env.BASE_URI
+                });
+                app.use(this.oidc.router)
+            }
+            catch(error) {
+                console.log(error);
+            }
+        }
+        else {
+            try {
+                this.tenant = process.env.TENANT
+                this.scopes = process.env.SCOPES
                 this.oidc = new ExpressOIDC({
                     issuer: process.env.TENANT,
                     client_id: process.env.CLIENT_ID,

@@ -5,7 +5,7 @@ const Tenant = require('./models/tenant')
 class TenantResolver {
     constructor() {
         this.tenants = new Map([]);
-        this.tenants.set("",new Tenant("sdfdsfsdf"))
+        this.tenants.set("",new Tenant())
     }
 
     ensureAuthenticated(){
@@ -17,12 +17,15 @@ class TenantResolver {
             if(matches != null){
                 const sub = matches[1]
                 if(this.tenants.has(sub)){
+                    console.log("Found known tenant")
                     tenant = this.tenants.get(sub)
                 } else {
                     try{
-                    var response = await axios.get(process.env.UDP_URI+"/api/config/"+sub+"/"+process.env.UDP_APP_NAME+"/.well-known/default-settings")
-                    console.log(response)
-                    //TODO call UDP to get the tenant config
+                        console.log("Consulting UDP for tenant info")
+                        var response = await axios.get(process.env.UDP_URI+"/api/configs/"+sub+"/"+process.env.UDP_APP_NAME)
+                        this.tenants.set(sub,new Tenant(response.data));
+                        tenant = this.tenants.get(sub)
+                        console.log("tenant stored")
                     }
                     catch(error){
                         console.log(error)
