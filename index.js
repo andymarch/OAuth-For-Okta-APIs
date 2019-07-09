@@ -3,9 +3,9 @@ const express = require('express')
 const hbs  = require('express-handlebars')
 const session = require('express-session')
 const axios = require('axios')
-const ExpressOIDC = require('@okta/oidc-middleware').ExpressOIDC
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: true });
+const tenantResolver = require('./tenantResolver')
 
 const UserProfile = require('./models/userprofile')
 const GroupProfile = require('./models/groupprofile')
@@ -38,17 +38,7 @@ app.use(session({
   resave: true
 }));
 
-const oidc = new ExpressOIDC({
-    issuer: process.env.TENANT,
-    client_id: process.env.CLIENT_ID,
-    client_secret: process.env.CLIENT_SECRET,
-    appBaseUrl: process.env.BASE_URI,
-    redirect_uri: process.env.REDIRECT_URI,
-    scope: process.env.SCOPES,
-    logoutRedirectUri: process.env.BASE_URI
-});
-  
-app.use(oidc.router);
+const tr = new tenantResolver();
 
 function parseJWT (token){
     var atob = require('atob');
@@ -85,7 +75,7 @@ function parse403(error){
 
 const router = express.Router();
 
-router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
+router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
 
     var userProfile;
     const tokenSet = req.userContext.tokens;
@@ -112,7 +102,7 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
 
     }
     catch(error) {
-        console.log(error);
+        //console.log(error);
     }
 
     var authorizations = {}
@@ -139,7 +129,7 @@ router.get("/",oidc.ensureAuthenticated(), async (req, res, next) => {
 
 });
 
-router.get("/editprofile",oidc.ensureAuthenticated(), async (req, res, next) => {
+router.get("/editprofile",tr.ensureAuthenticated(), async (req, res, next) => {
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
@@ -168,7 +158,7 @@ router.get("/editprofile",oidc.ensureAuthenticated(), async (req, res, next) => 
     }
 });
 
-router.post("/editprofile",oidc.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
+router.post("/editprofile",tr.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
@@ -189,14 +179,14 @@ router.post("/editprofile",oidc.ensureAuthenticated(), urlencodedParser, async (
     }
 });
 
-router.get("/addTeamMember/:groupId",oidc.ensureAuthenticated(), async (req, res, next) => {
+router.get("/addTeamMember/:groupId",tr.ensureAuthenticated(), async (req, res, next) => {
     res.render("addTeamMember",{
         user: new UserProfile(),
         groupId: req.params.groupId
        });
 });
 
-router.post("/addTeamMember/:groupId",oidc.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
+router.post("/addTeamMember/:groupId",tr.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
@@ -231,12 +221,12 @@ router.post("/addTeamMember/:groupId",oidc.ensureAuthenticated(), urlencodedPars
     }
 });
 
-router.get("/addApplication",oidc.ensureAuthenticated(), async (req, res, next) => {
+router.get("/addApplication",tr.ensureAuthenticated(), async (req, res, next) => {
     res.render("addApplication",{
        });
 });
 
-router.post("/addApplication",oidc.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
+router.post("/addApplication",tr.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
@@ -294,10 +284,4 @@ app.get("/logout", (req, res) => {
 
 app.use(router)
 
-oidc.on('ready', () => {
-  app.listen(PORT, () => console.log('app started'));
-});
-
-oidc.on("error", err => {
-  console.error(err);
-});
+app.listen(PORT, () => console.log('app started'));
