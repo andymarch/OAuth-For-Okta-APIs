@@ -1,5 +1,4 @@
 const ExpressOIDC = require('@okta/oidc-middleware').ExpressOIDC
-const Tenant = require('./models/tenant')
 
 class TenantResolver {
     constructor() {
@@ -41,9 +40,9 @@ class TenantResolver {
                     Error: "Unable to determine tenant configuration."
                   });
             }
+            var oldNext = next;
             next = oidc.ensureAuthenticated()
-            //TODO this appears to be double executing after redirect without context
-            next(req,res,next)
+            next(req,res,oldNext)
         }
     }
 }
