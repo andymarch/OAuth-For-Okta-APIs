@@ -19,6 +19,7 @@ class TenantResolver {
                             Authorization: 'Bearer '+ process.env.UDP_ACCESS_TOKEN
                         }
                     })
+                    response.data.redirect_uri = response.data.redirect_uri.replace('/authorization-code/callback', '')
                     this.tenants.set(sub,new Tenant(response.data));
                     console.log("tenant stored")
                 }
