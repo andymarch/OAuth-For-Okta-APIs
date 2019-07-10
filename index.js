@@ -274,13 +274,19 @@ router.post("/addApplication",tr.ensureAuthenticated(), urlencodedParser, async 
 });
 
 app.get("/logout", (req, res) => {
+    let protocol = "http"
+    if(req.secure){
+        protocol = "https"
+    }
+    else if(req.get('x-forwarded-proto')){
+        protocol = req.get('x-forwarded-proto')
+    }
     const tokenSet = req.userContext.tokens;
-    console.log(req)
     req.logout();
     res.redirect(tr.getRequestingTenant(req).tenant+'/oauth2/v1/logout?id_token_hint='
         + tokenSet.id_token
         + '&post_logout_redirect_uri='
-        + encodeURI(req.protocol+"://"+req.headers.host)
+        + encodeURI(protocol+"://"+req.headers.host)
         );
 });
 
