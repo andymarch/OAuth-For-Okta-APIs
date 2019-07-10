@@ -8,11 +8,11 @@ class Tenant {
                 this.oidc = new ExpressOIDC({
                     issuer: tenantProfileJson.okta_org_name,
                     client_id: tenantProfileJson.client_id,
-                    client_secret: process.env.CLIENT_SECRET,
+                    client_secret: tenantProfileJson.client_secret,
                     appBaseUrl: tenantProfileJson.redirect_uri,
                     redirect_uri: tenantProfileJson.redirect_uri,
                     scope: process.env.SCOPES,
-                    logoutRedirectUri: process.env.BASE_URI
+                    logoutRedirectUri: tenantProfileJson.redirect_uri
                 });
                 app.use(this.oidc.router)
             }

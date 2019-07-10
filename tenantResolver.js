@@ -10,29 +10,34 @@ class TenantResolver {
 
     ensureAuthenticated(){
         return async (req, res, next) => {
-            var tenant;
-            //TODO fix this tangly mess
             let sub = req.headers.host.substr(0,req.headers.host.indexOf("."+process.env.BASE_HOST))
-            if(this.tenants.has(sub)){
-                console.log("Found known tenant '"+sub+"'")
-                tenant = this.tenants.get(sub)
-            } else {
+            if(!this.tenants.has(sub)){
                 try{
                     console.log("Consulting UDP for tenant info of "+sub)
-                    var response = await axios.get(process.env.UDP_URI+"/api/configs/"+sub+"/"+process.env.UDP_APP_NAME)
+                    var response = await axios.get(process.env.UDP_URI+"/api/configs/"+sub+"/"+process.env.UDP_APP_NAME,{
+                        headers:{
+                            Authorization: 'Bearer '+ process.env.UDP_ACCESS_TOKEN
+                        }
+                    })
                     this.tenants.set(sub,new Tenant(response.data));
-                    tenant = this.tenants.get(sub)
                     console.log("tenant stored")
                 }
                 catch(error){
                     console.log(error)
+                    return res.status(500).json({
+                        Error: "Failed to retrieve tenant configuration from UDP for "+sub
+                      });
                 }
             }
+
+            var tenant = this.tenants.get(sub)
+
             if(tenant == null){
                 return res.status(500).json({
                     Error: "Unable to determine tenant configuration for "+sub
                   });
             }
+
             var oldNext = next;
             if(tenant.oidc == null){
                 this.tenants.delete(sub)
