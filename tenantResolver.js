@@ -5,7 +5,7 @@ const Tenant = require('./models/tenant')
 class TenantResolver {
     constructor() {
         this.tenants = new Map([]);
-        this.tenants.set("",new Tenant())
+        this.tenants.set("example",new Tenant())
     }
 
     ensureAuthenticated(){
