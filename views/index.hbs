@@ -1,7 +1,8 @@
 <div id="BrandLogo"></div>
 <div class="content">
     <div class="section">
-        <p>Welcome, {{user.name}}! You last logged in {{user.lastLogin}}.</p>
+        <p>Welcome, {{user.name}}!</p>
+        <p>You last logged in {{user.lastLogin}}.</p>
     </div>
 
     {{#if wasDownscoped}}
@@ -25,37 +26,44 @@
 
     <div class="section">
         <h1>Your Profile</h1>
+        {{#if user.phoneNumber}}
         <p>Your registered phone number is {{user.phoneNumber}}.</p>
+        {{else}}
+        <p>Please complete your profile.</p>
+        {{/if}}
         <form action="/editProfile">
             <input type="submit" class="btn-positive" value="Edit" />
         </form>
     </div>
 
+    {{#if groups}}
     <div class="section">
         <h1>Your Teams</h1>
         {{#each groups}}
             <div> 
-                <p>{{this.name}}</p>
-                <div>
-                    <form action="/addTeamMember/{{this.id}}">
-                        <input type="submit" class="btn-positive" value="New Team Member" />
-                    </form>
-                </div>
+                <h3>{{this.name}}</h3>
+                <p>{{this.desc}}</p>
+                <form action="/addTeamMember/{{this.id}}">
+                    <input type="submit" class="btn-positive" value="Add Team Member" />
+                </form>
             </div>
         {{/each}}
     </div>
+    {{/if}}
 
+    {{#if applications}}
     <div class="section">
         <h1>Your Applications</h1>
         {{#each applications}}
-            <div>
+            <div class="application">
                 {{this.name}}
             </div>
         {{/each}}
         <form action="/addApplication">
-            <input type="submit" class="btn-positive"  value="New Application" />
+            <input type="submit" class="btn-positive"  value="Add Application" />
         </form>
     </div>
+    {{/if}}
 
     <div class="section">
         <h1>Logout</h1>

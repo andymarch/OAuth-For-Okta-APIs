@@ -38,7 +38,7 @@ resource "okta_user" "Ada" {
     group_memberships = ["${okta_group.team.id}"]
     //Can't find a way to restrict this to the above group in the provider
     //default is to all groups which shows a bit too much data in the demo
-    admin_roles = ["USER_ADMIN"]
+    admin_roles = ["USER_ADMIN","APP_ADMIN"]
 }
 
 resource "okta_user" "Babbage" {

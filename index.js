@@ -62,14 +62,24 @@ function wasDownscoped(scopes){
 }
 
 function parse403(error){
-    if(error.response.headers['www-authenticate']){
+function parseError(error){
+    if(error.response.status === 403 && error.response.headers['www-authenticate']){
         var error_description_pattern = /.*error_description=\"([^\"]+)\",.*/
         var scope_pattern = /.*scope=\"([^\"]+)\".+/
         var des = error.response.headers['www-authenticate'].match(error_description_pattern)[1]
         var scopeRequired = error.response.headers['www-authenticate'].match(scope_pattern)[1]
         return des+ " Required Scope: "+scopeRequired
-    } else{
-        return error.response.data.error_description
+    } 
+
+    if(error.response.data.errorSummary){
+        return error.response.data.errorSummary
+    }
+    if (error.response.data.error_description){
+    return error.response.data.error_description
+    }
+    else {
+        console.log(error)
+        return "Unable to parse error cause. Check console."
     }
 }
 
@@ -90,8 +100,13 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
         var userManagedGroups = []
         groupres = await axios.get(requestingTenant.tenant+'/api/v1/users/'+req.userContext.userinfo.sub+'/groups')
         groupres.data.forEach(function(element) {
-            userManagedGroups.push(new GroupProfile(element))
+            if(element.profile.name != "Everyone"){
+                userManagedGroups.push(new GroupProfile(element))
+            }
         });
+        if(userManagedGroups.length == 0){
+            userManagedGroups = null;
+        }
 
         var userManagedApplications = []
         if(scopes.includes("okta.clients.read")){
@@ -100,6 +115,9 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
                 userManagedApplications.push(new AppProfile(element))
             });
         } 
+        if(userManagedApplications.length == 0){
+            userManagedApplications = null;
+        }
 
     }
     catch(error) {
@@ -143,19 +161,10 @@ router.get("/editprofile",tr.ensureAuthenticated(), async (req, res, next) => {
         });
     }
     catch(error) {
-        if(error.response.status === 403){
-            res.render("editprofile",{
-                user: new UserProfile(),
-                error: parse403(error)
-            });
-        }
-        else {
-            console.log(error)
-            res.render("editprofile",{
-                user: new UserProfile(),
-                error: "Unknown error, check console."
-            });
-        }
+        res.render("editprofile",{
+            user: new UserProfile(),
+            error: parseError(error)
+        });
     }
 });
 
@@ -170,13 +179,7 @@ router.post("/editprofile",tr.ensureAuthenticated(), urlencodedParser, async (re
         res.redirect("/")
     }
     catch(error) {
-        if(error.response.status === 403){
-            res.redirect("/editprofile/?error="+encodeURIComponent(parse403(error))) 
-        }
-        else {
-            console.log(error)
-            res.redirect("/editprofile/?error="+encodeURIComponent("Unknown error, check console"))
-        }
+        res.redirect("/editprofile/?error="+encodeURIComponent(parseError(error))) 
     }
 });
 
@@ -206,14 +209,7 @@ router.post("/addTeamMember/:groupId",tr.ensureAuthenticated(), urlencodedParser
         res.redirect("/")
     }
     catch(error) {
-        var errorMsg;
-        if(error.response.status === 403){
-            errorMsg = parse403(error)
-        }
-        else {
-            console.error(error)
-            errorMsg = "Unknown error, check console";
-        }
+        var errorMsg = parseError(error)
         res.render("addTeamMember",{
             user: new UserProfile(),
             groupId: req.params.groupId,
@@ -256,15 +252,9 @@ router.post("/addApplication",tr.ensureAuthenticated(), urlencodedParser, async 
         res.redirect("/")
     }
     catch(error) {
-        var errorMsg;
-        if(error.response.status === 403){
-            errorMsg = parse403(error)
-        }
-        else {
-            console.error(error)
-            errorMsg = "Unknown error, check console";
-        }
-
+        console.log(error)
+        var errorMsg = parseError(error)
+        
         res.render("addApplication",{
             clientName: req.body.clientName,
             uri: req.body.uri,
