@@ -61,7 +61,6 @@ function wasDownscoped(scopes){
     return result;
 }
 
-function parse403(error){
 function parseError(error){
     if(error.response.status === 403 && error.response.headers['www-authenticate']){
         var error_description_pattern = /.*error_description=\"([^\"]+)\",.*/
