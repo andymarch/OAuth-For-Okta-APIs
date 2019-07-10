@@ -6,12 +6,13 @@
         <input type="hidden" value="{{groupId}}"/>
             <div class="section">
                 <label for="name">Name</label>
-                <input type="text" name="name" value="{{user.name}}"></input>
+                <input type="text" name="name" value="{{user.name}}"
+                pattern=".*\s.*" title="firstname<space>lastname"></input>
                 <label for="phonenumber">Phone Number</label>
                 <input type="text" name="phonenumber"
-                value="{{user.phoneNumber}}"></input>
+                value="{{user.phoneNumber}}" pattern="[0-9]+" title="Only numbers"></input>
                 <label for="email">Email</label>
-                <input type="text" name="email" value="{{user.email}}"></input>
+                <input type="email" name="email" value="{{user.email}}"></input>
                 <button class="btn-positive" type="submit">Submit</button>
             </div>
         </form>

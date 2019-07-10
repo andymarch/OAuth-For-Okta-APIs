@@ -5,10 +5,12 @@
         <form action="/addApplication" method="POST">
         <input type="hidden" value="{{groupId}}"/>
             <div class="section">
-                <label for="name">Client Name</label>
+                <label for="name">Application Name</label>
                 <input type="text" name="clientName" value={{clientName}}></input>
                 <label for="uri">Application Base URI</label>
-                <input type="text" name="uri" value={{uri}}></input>
+                <input type="text" name="uri"
+                pattern="[http|https]://.*" title="Valid uri starting with http
+                or https" value={{uri}}></input>
                 <button type="submit" class="btn-positive" >Submit</button>
             </div>
         </form>

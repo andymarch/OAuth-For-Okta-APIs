@@ -1,10 +1,15 @@
+:root {
+    --main-theme-color: #e22866;
+    --text-color:#d2d2d6
+  }
+
 html{
     background: #20313b;
 }
 
 body{
     font-family: 'Roboto', sans-serif;
-    color: #d2d2d6;
+    color: var(--text-color);
 }
 
 html, body, .viewport {
@@ -62,7 +67,7 @@ p {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    background-color: #d2d2d6;
+    background-color: var(--text-color);
     color: black
 }
 
@@ -90,7 +95,7 @@ label{
 
 .btn-positive {
     margin: 5px;
-    background-color: #e22866;
+    background-color: var(--main-theme-color);
     color: white;
     border-radius: 3px;
     font-size: 14px;
@@ -126,9 +131,24 @@ table {
 }
 
 th, td {
-    border-bottom: 1px solid #d2d2d6;
+    border-bottom: 1px solid var(--text-color);
 }
 
 form {
     text-align: center;
   }
+
+input {
+    text-align: center;
+    border: 0px;
+    border-bottom: 1px var(--text-color) solid;
+    background: transparent;
+    color: var(--text-color);
+    font-size: x-large;
+    margin-bottom: 20px;
+}
+
+label{
+    color: var(--main-theme-color);
+    font-size: smaller;
+}
