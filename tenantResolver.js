@@ -11,7 +11,10 @@ class TenantResolver {
     ensureAuthenticated(){
         return async (req, res, next) => {
             let sub = req.headers.host.substr(0,req.headers.host.indexOf("."+process.env.BASE_HOST))
-            if(!this.tenants.has(sub)){
+            
+            var tenant = this.tenants.get(sub)
+
+            if(tenant == null || tenant.isExpired()){
                 try{
                     console.log("Consulting UDP for tenant info of "+sub)
                     var response = await axios.get(process.env.UDP_URI+"/api/configs/"+sub+"/"+process.env.UDP_APP_NAME,{
@@ -31,7 +34,7 @@ class TenantResolver {
                 }
             }
 
-            var tenant = this.tenants.get(sub)
+            
 
             if(tenant == null){
                 return res.status(500).json({

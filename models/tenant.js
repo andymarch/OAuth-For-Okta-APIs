@@ -14,6 +14,9 @@ class Tenant {
                     scope: process.env.SCOPES,
                     logoutRedirectUri: tenantProfileJson.redirect_uri
                 });
+                var expire = new Date()
+                expire.setMinutes(expire.getMinutes + 5)
+                this.expires = expire
                 app.use(this.oidc.router)
             }
             catch(error) {
@@ -33,11 +36,19 @@ class Tenant {
                     logoutRedirectUri: process.env.BASE_URI
                 });
                 app.use(this.oidc.router)
+                this.expires = null
             }
             catch(error) {
                 console.log(error);
             }
         }
+    }
+
+    isExpired(){
+        if(this.expires === null){
+            return false
+        }
+        return new Date() > this.expires
     }
 }
 
