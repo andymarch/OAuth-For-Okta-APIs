@@ -25,6 +25,7 @@ class TenantResolver {
                     response.data.redirect_uri = response.data.redirect_uri.replace('/authorization-code/callback', '')
                     this.tenants.set(sub,new Tenant(response.data));
                     console.log("tenant stored")
+                    tenant = this.tenants.get(sub)
                 }
                 catch(error){
                     console.log(error)
