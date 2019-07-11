@@ -14,9 +14,7 @@ class Tenant {
                     scope: process.env.SCOPES,
                     logoutRedirectUri: tenantProfileJson.redirect_uri
                 });
-                var expire = new Date()
-                expire.setMinutes(expire.getMinutes + process.env.UDP_CACHE_DURATION)
-                this.expires = expire
+                this.expires = new Date(new Date().getTime() + process.env.UDP_CACHE_DURATION*60000);
                 app.use(this.oidc.router)
             }
             catch(error) {
@@ -45,12 +43,9 @@ class Tenant {
     }
 
     isExpired(){
-        console.log("Checking expiry on stored tenant")
         if(this.expires === null){
             return false
         }
-
-        console.log("expire: "+ this.expires)
         return new Date() > this.expires
     }
 }
