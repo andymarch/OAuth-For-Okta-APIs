@@ -7,6 +7,8 @@ const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: true });
 const tenantResolver = require('./tenantResolver')
 
+var passport = require('passport');
+
 const UserProfile = require('./models/userprofile')
 const GroupProfile = require('./models/groupprofile')
 const AppProfile = require('./models/appprofile')
@@ -37,6 +39,17 @@ app.use(session({
   saveUninitialized: false,
   resave: true
 }));
+
+app.use(passport.initialize({ userProperty: 'userContext' }));
+app.use(passport.session());
+
+passport.serializeUser((user, next) => {
+    next(null, user);
+  });
+  
+  passport.deserializeUser((obj, next) => {
+    next(null, obj);
+  });
 
 const tr = new tenantResolver();
 
@@ -120,7 +133,7 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
 
     }
     catch(error) {
-        //console.log(error);
+        console.log(error);
     }
 
     var authorizations = {}
@@ -270,10 +283,13 @@ app.get("/logout", (req, res) => {
     else if(req.get('x-forwarded-proto')){
         protocol = req.get('x-forwarded-proto')
     }
+    const tenant = tr.getRequestingTenant(req).tenant
     const tokenSet = req.userContext.tokens;
+    const id_token_hint = tokenSet.id_token
     req.logout();
-    res.redirect(tr.getRequestingTenant(req).tenant+'/oauth2/v1/logout?id_token_hint='
-        + tokenSet.id_token
+    req.session.destroy();
+    res.redirect(tenant+'/oauth2/v1/logout?id_token_hint='
+        + id_token_hint
         + '&post_logout_redirect_uri='
         + encodeURI(protocol+"://"+req.headers.host)
         );

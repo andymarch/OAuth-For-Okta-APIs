@@ -1,16 +1,24 @@
 const ExpressOIDC = require('@okta/oidc-middleware').ExpressOIDC
 const axios = require('axios')
 const Tenant = require('./models/tenant')
+var passport = require('passport');
+var OidcStrategy = require('passport-openidconnect').Strategy;
+
+const defaultTenantSub = "default"
 
 class TenantResolver {
     constructor() {
         this.tenants = new Map([]);
-        this.tenants.set("",new Tenant())
+        this.tenants.set(defaultTenantSub,new Tenant(null,defaultTenantSub))
+        this.registerTenantRoutes(this.tenants.get(defaultTenantSub),defaultTenantSub)
     }
 
     ensureAuthenticated(){
         return async (req, res, next) => {
             let sub = req.headers.host.substr(0,req.headers.host.indexOf("."+process.env.BASE_HOST))
+            if(sub == ""){
+                sub = defaultTenantSub
+            }
             
             var tenant = this.tenants.get(sub)
 
@@ -23,9 +31,10 @@ class TenantResolver {
                         }
                     })
                     response.data.redirect_uri = response.data.redirect_uri.replace('/authorization-code/callback', '')
-                    this.tenants.set(sub,new Tenant(response.data));
+                    this.tenants.set(sub,new Tenant(response.data,sub));
                     console.log("tenant stored")
                     tenant = this.tenants.get(sub)
+                    this.registerTenantRoutes(tenant,sub)
                 }
                 catch(error){
                     console.log(error)
@@ -41,21 +50,48 @@ class TenantResolver {
                   });
             }
 
-            var oldNext = next;
-            if(tenant.oidc == null){
-                this.tenants.delete(sub)
-                return res.status(500).json({
-                    Error: "Tenant configuration was malformed unable to configure middleware. Tenant will be removed, update configuration and retry."
-                  });
-            }
-            next = tenant.oidc.ensureAuthenticated()
-            next(req,res,oldNext)
+            if (req.isAuthenticated()) {
+                return next();
+              }
+            res.redirect("/login/"+sub)
         }
     }
 
     getRequestingTenant(req){
         let sub = req.headers.host.substr(0,req.headers.host.indexOf("."+process.env.BASE_HOST))
+        if(sub == ""){
+            sub = defaultTenantSub
+        }
         return this.tenants.get(sub)
+    }
+
+    registerTenantRoutes(tenant,sub){
+        passport.use(sub, new OidcStrategy({
+            issuer: tenant.tenant,
+            authorizationURL: tenant.authorizationURL,
+            tokenURL: tenant.tokenURL,
+            userInfoURL: tenant.userInfoURL,
+            clientID: tenant.clientID,
+            clientSecret: tenant.clientSecret,
+            callbackURL: tenant.callbackURL,
+            scope: process.env.SCOPES
+          },(issuer, sub, profile, accessToken, refreshToken,extraParams, done) => {
+            var user = {
+                'userinfo': {
+                    'sub'  : sub,
+                    'name' : profile.name.givenName + ' ' + profile.name.familyName
+                },
+                'id'   : profile.id,
+                'tokens': {
+                    'access_token':accessToken,
+                    'id_token': extraParams.id_token
+                } 
+            }
+            return done(null, user);
+          }));
+
+        app.use("/login/"+sub,passport.authenticate(sub))
+        app.use('/authorization-code/callback/'+sub,passport.authenticate(sub, { successRedirect: '/', failureRedirect: '/login' }));
     }
 }
 
