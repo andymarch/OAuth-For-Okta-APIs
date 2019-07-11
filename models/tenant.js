@@ -15,7 +15,7 @@ class Tenant {
                     logoutRedirectUri: tenantProfileJson.redirect_uri
                 });
                 var expire = new Date()
-                expire.setMinutes(expire.getMinutes + 5)
+                expire.setMinutes(expire.getMinutes + process.env.UDP_CACHE_DURATION)
                 this.expires = expire
                 app.use(this.oidc.router)
             }
@@ -49,7 +49,8 @@ class Tenant {
         if(this.expires === null){
             return false
         }
-        console.log("isExpired: "+new Date() > this.expires)
+
+        console.log("expire: "+ this.expires)
         return new Date() > this.expires
     }
 }
