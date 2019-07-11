@@ -50,7 +50,7 @@ class TenantResolver {
                   });
             }
 
-            if (req.isAuthenticated()) {
+            if (req.isAuthenticated() && req.userContext != null) {
                 return next();
               }
             res.redirect("/login/"+sub)
