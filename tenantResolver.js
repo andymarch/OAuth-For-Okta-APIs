@@ -35,8 +35,6 @@ class TenantResolver {
                 }
             }
 
-            
-
             if(tenant == null){
                 return res.status(500).json({
                     Error: "Unable to determine tenant configuration for "+sub

@@ -45,9 +45,11 @@ class Tenant {
     }
 
     isExpired(){
+        console.log("Checking expiry on stored tenant")
         if(this.expires === null){
             return false
         }
+        console.log("isExpired: "+new Date() > this.expires)
         return new Date() > this.expires
     }
 }
