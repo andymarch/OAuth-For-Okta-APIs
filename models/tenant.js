@@ -10,7 +10,7 @@ class Tenant {
                 this.userInfoURL= tenantProfileJson.okta_org_name+'/oauth2/v1/userinfo',
                 this.clientID= tenantProfileJson.client_id,
                 this.clientSecret =  tenantProfileJson.client_secret,
-                this.callbackURL = tenantProfileJson.redirect_uri+'/authorization-code/callback/'+sub
+                this.callbackURL = tenantProfileJson.redirect_uri+'/authorization-code/'+sub
             }
             catch(error) {
                 console.log(error);
@@ -26,7 +26,7 @@ class Tenant {
                 this.userInfoURL = process.env.TENANT+'/oauth2/v1/userinfo',
                 this.clientID = process.env.CLIENT_ID,
                 this.clientSecret = process.env.CLIENT_SECRET,
-                this.callbackURL = process.env.REDIRECT_URI+'/authorization-code/callback/'+sub
+                this.callbackURL = process.env.REDIRECT_URI+'/authorization-code/'+sub
             }
             catch(error) {
                 console.log(error);
