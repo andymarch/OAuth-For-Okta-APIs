@@ -91,7 +91,7 @@ class TenantResolver {
           }));
 
         app.use("/login/"+sub,passport.authenticate(sub))
-        app.use('/authorization-code/'+sub,passport.authenticate(sub, { successRedirect: '/', failureRedirect: '/login' }));
+        app.use('/authorization-code/'+sub,passport.authenticate(sub, { successRedirect: '/', failureRedirect: '/error' }));
     }
 }
 

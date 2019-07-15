@@ -295,6 +295,13 @@ app.get("/logout", (req, res) => {
         );
 });
 
+router.get("/error",async (req, res, next) => {
+    console.log(req)
+    res.render("error",{
+        msg: "An error occured, unable to process your request."
+       });
+});
+
 app.use(router)
 
 app.listen(PORT, () => console.log('app started'));
