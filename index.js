@@ -6,10 +6,11 @@ const axios = require('axios')
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: true });
 var methodOverride = require('method-override')
-const tenantResolver = require('./tenantResolver')
 
 var passport = require('passport');
+var logger = require('./logger')
 
+const tenantResolver = require('./tenantResolver')
 const UserProfile = require('./models/userprofile')
 const GroupProfile = require('./models/groupprofile')
 const AppProfile = require('./models/appprofile')
@@ -91,7 +92,7 @@ function parseError(error){
     return error.response.data.error_description
     }
     else {
-        console.log(error)
+        logger.error(error)
         return "Unable to parse error cause. Check console."
     }
 }
@@ -134,7 +135,7 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
 
     }
     catch(error) {
-        console.log(error);
+        logger.error(error);
     }
 
     var authorizations = {}
@@ -265,7 +266,7 @@ router.post("/addApplication",tr.ensureAuthenticated(), urlencodedParser, async 
         res.redirect("/")
     }
     catch(error) {
-        console.log(error)
+        logger.error(error)
         var errorMsg = parseError(error)
         
         res.render("addApplication",{
@@ -297,7 +298,7 @@ app.get("/logout", (req, res) => {
 });
 
 router.get("/error",async (req, res, next) => {
-    console.log(req)
+    logger.warn(req)
     res.render("error",{
         msg: "An error occured, unable to process your request."
        });
@@ -315,7 +316,7 @@ app.use(function (req, res, next) {
 })
 
 function logErrors (err, req, res, next) {
-    console.error(err.stack)
+    logger.error(err.stack)
     next(err)
   }
   
@@ -330,4 +331,4 @@ function logErrors (err, req, res, next) {
   }
   
 
-app.listen(PORT, () => console.log('app started'));
+app.listen(PORT, () => logger.info('app started'));

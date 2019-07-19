@@ -1,8 +1,8 @@
-const ExpressOIDC = require('@okta/oidc-middleware').ExpressOIDC
 const axios = require('axios')
 const Tenant = require('./models/tenant')
 var passport = require('passport');
 var OidcStrategy = require('passport-openidconnect').Strategy;
+var logger = require('./logger')
 
 const defaultTenantSub = "default"
 
@@ -17,6 +17,7 @@ class TenantResolver {
         return async (req, res, next) => {
             let sub = req.headers.host.substr(0,req.headers.host.indexOf("."+process.env.BASE_HOST))
             if(sub == ""){
+                logger.info("Using default sub.")
                 sub = defaultTenantSub
             }
             
@@ -24,7 +25,7 @@ class TenantResolver {
 
             if(tenant == null || tenant.isExpired()){
                 try{
-                    console.log("Consulting UDP for tenant info of "+sub)
+                    logger.info.log("Consulting UDP for tenant info of "+sub)
                     var response = await axios.get(process.env.UDP_URI+"/api/configs/"+sub+"/"+process.env.UDP_APP_NAME,{
                         headers:{
                             Authorization: 'Bearer '+ process.env.UDP_ACCESS_TOKEN
@@ -32,12 +33,12 @@ class TenantResolver {
                     })
                     response.data.redirect_uri = response.data.redirect_uri.replace('/authorization-code/callback', '')
                     this.tenants.set(sub,new Tenant(response.data,sub));
-                    console.log("tenant stored")
+                    logger.info("Tenant " + sub + "stored");
                     tenant = this.tenants.get(sub)
                     this.registerTenantRoutes(tenant,sub)
                 }
                 catch(error){
-                    console.log(error)
+                    logger.error(error)
                     return res.status(500).json({
                         Error: "Failed to retrieve tenant configuration from UDP for "+sub
                       });

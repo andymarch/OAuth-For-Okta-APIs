@@ -1,3 +1,5 @@
+var logger = require('./logger.js')
+
 class AppProfile {
     constructor(profileJson) {
         if(profileJson){
@@ -6,7 +8,7 @@ class AppProfile {
                 this.name = profileJson.client_name
             }
             catch(error) {
-                console.log(error);
+                logger.error(error);
             }
         }
     }

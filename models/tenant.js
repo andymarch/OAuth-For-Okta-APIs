@@ -1,3 +1,4 @@
+var logger = require('./logger.js')
 
 class Tenant {
     constructor(tenantProfileJson,sub) {
@@ -13,7 +14,7 @@ class Tenant {
                 this.callbackURL = tenantProfileJson.redirect_uri+'/authorization-code/'+sub
             }
             catch(error) {
-                console.log(error);
+                logger.error(error);
             }
         }
         else {
@@ -29,7 +30,7 @@ class Tenant {
                 this.callbackURL = process.env.REDIRECT_URI+'/authorization-code/'+sub
             }
             catch(error) {
-                console.log(error);
+                logger.error(error);
             }
         }
     }

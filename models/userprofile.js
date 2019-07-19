@@ -1,3 +1,5 @@
+var logger = require('./logger.js')
+
 class UserProfile {
     constructor(profileJson) {
         if(profileJson){
@@ -10,7 +12,7 @@ class UserProfile {
                 this.lastUpdate = profileJson.lastUpdated
             }
             catch(error) {
-                console.log(error);
+                logger.error(error);
             }
         }
     }

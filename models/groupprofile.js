@@ -1,3 +1,5 @@
+var logger = require('./logger.js')
+
 class GroupProfile {
     constructor(profileJson) {
         if(profileJson){
@@ -7,7 +9,7 @@ class GroupProfile {
                 this.desc = profileJson.profile.description
             }
             catch(error) {
-                console.log(error);
+                logger.error(error);
             }
         }
     }
