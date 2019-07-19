@@ -281,7 +281,7 @@ app.get("/logout", (req, res) => {
         protocol = "https"
     }
     else if(req.get('x-forwarded-proto')){
-        protocol = req.get('x-forwarded-proto')
+        protocol = req.get('x-forwarded-proto').split(",")[0]
     }
     const tenant = tr.getRequestingTenant(req).tenant
     const tokenSet = req.userContext.tokens;
