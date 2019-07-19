@@ -5,6 +5,7 @@ const session = require('express-session')
 const axios = require('axios')
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: true });
+var methodOverride = require('method-override')
 const tenantResolver = require('./tenantResolver')
 
 var passport = require('passport');
@@ -303,5 +304,30 @@ router.get("/error",async (req, res, next) => {
 });
 
 app.use(router)
+app.use(methodOverride())
+app.use(logErrors)
+app.use(clientErrorHandler)
+app.use(errorHandler)
+
+app.use(function (req, res, next) {
+    res.status(404);
+    res.render('error', { msg: "Sorry can't find "+req.path})
+})
+
+function logErrors (err, req, res, next) {
+    console.error(err.stack)
+    next(err)
+  }
+  
+  function clientErrorHandler (err, req, res, next) {
+    res.status(500)
+    res.render('error', { msg: err })
+  }
+
+  function errorHandler (err, req, res, next) {
+    res.status(500)
+    res.render('error', { msg: err })
+  }
+  
 
 app.listen(PORT, () => console.log('app started'));
