@@ -25,7 +25,7 @@ class TenantResolver {
 
             if(tenant == null || tenant.isExpired()){
                 try{
-                    logger.info.log("Consulting UDP for tenant info of "+sub)
+                    logger.info("Consulting UDP for tenant info of "+sub)
                     var response = await axios.get(process.env.UDP_URI+"/api/configs/"+sub+"/"+process.env.UDP_APP_NAME,{
                         headers:{
                             Authorization: 'Bearer '+ process.env.UDP_ACCESS_TOKEN
