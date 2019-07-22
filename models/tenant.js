@@ -1,4 +1,4 @@
-var logger = require('./logger.js')
+var logger = require('../logger.js')
 
 class Tenant {
     constructor(tenantProfileJson,sub) {
