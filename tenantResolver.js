@@ -92,7 +92,9 @@ class TenantResolver {
           }));
 
         app.use("/login/"+sub,passport.authenticate(sub))
+        logger.verbose("added route /login/"+sub)
         app.use('/authorization-code/'+sub,passport.authenticate(sub, { successRedirect: '/', failureRedirect: '/error' }));
+        logger.verbose("added route /authorization-code/"+sub)
     }
 }
 

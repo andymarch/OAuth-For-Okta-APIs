@@ -305,7 +305,7 @@ router.get("/error",async (req, res, next) => {
 });
 
 app.use(router)
-app.use(methodOverride())
+/*app.use(methodOverride())
 app.use(logErrors)
 app.use(clientErrorHandler)
 app.use(errorHandler)
@@ -328,7 +328,7 @@ function logErrors (err, req, res, next) {
   function errorHandler (err, req, res, next) {
     res.status(500)
     res.render('error', { msg: err })
-  }
+  }*/
   
 
 app.listen(PORT, () => logger.info('app started'));
