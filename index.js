@@ -284,7 +284,7 @@ router.post("/addApplication",tr.ensureAuthenticated(), urlencodedParser, async 
     }
 });
 
-app.get("/logout", (req, res) => {
+app.get("/logout", tr.ensureAuthenticated(), (req, res) => {
     logger.verbose("/logout requsted")
     let protocol = "http"
     if(req.secure){
