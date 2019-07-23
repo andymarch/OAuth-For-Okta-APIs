@@ -14,9 +14,9 @@ class Tenant {
                 logger.verbose("TokenUrl: "+tokenURL)
                 this.userInfoURL= tenantProfileJson.okta_org_name+'/oauth2/v1/userinfo',
                 logger.verbose("UserInfoUrl: "+this.userInfoURL)
-                this.clientID= tenantProfileJson.client_id,
+                this.clientID= tenantProfileJson.client_id
                 logger.verbose("ClientID: "+this.clientID)
-                this.clientSecret =  tenantProfileJson.client_secret,
+                this.clientSecret =  tenantProfileJson.client_secret
                 if(this.clientSecret != null){
                     logger.verbose("ClientSecret: --present--")
                 }
