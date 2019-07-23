@@ -20,7 +20,8 @@ class TenantResolver {
                 logger.info("Using default sub.")
                 sub = defaultTenantSub
             }
-            
+
+            logger.verbose("Request for subdomain "+sub+" received.")
             var tenant = this.tenants.get(sub)
 
             if(tenant == null || tenant.isExpired()){
@@ -33,7 +34,7 @@ class TenantResolver {
                     })
                     response.data.redirect_uri = response.data.redirect_uri.replace('/authorization-code/callback', '')
                     this.tenants.set(sub,new Tenant(response.data,sub));
-                    logger.info("Tenant " + sub + "stored");
+                    logger.info("Tenant " + sub + " stored");
                     tenant = this.tenants.get(sub)
                     this.registerTenantRoutes(tenant,sub)
                 }
@@ -59,10 +60,13 @@ class TenantResolver {
     }
 
     getRequestingTenant(req){
+        logger.verbose("Resolving tenant from request")
         let sub = req.headers.host.substr(0,req.headers.host.indexOf("."+process.env.BASE_HOST))
         if(sub == ""){
+            logger.verbose("Subdomain was empty using default tenant.")
             sub = defaultTenantSub
         }
+        logger.verbose("Looking for tenant "+sub)
         return this.tenants.get(sub)
     }
 

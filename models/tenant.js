@@ -5,13 +5,26 @@ class Tenant {
         if(tenantProfileJson){
             try {
                 this.tenant = tenantProfileJson.okta_org_name
+                logger.verbose("Tenant: "+this.tenant)
                 this.expires = new Date(new Date().getTime() + process.env.UDP_CACHE_DURATION*60000);
+                logger.verbose("Expires: "+this.expires)
                 this.authorizationURL = tenantProfileJson.okta_org_name+ '/oauth2/v1/authorize',
+                logger.verbose("AuthzUrl: "+this.authorizationURL)
                 this.tokenURL= tenantProfileJson.okta_org_name+'/oauth2/v1/token',
+                logger.verbose("TokenUrl: "+tokenURL)
                 this.userInfoURL= tenantProfileJson.okta_org_name+'/oauth2/v1/userinfo',
+                logger.verbose("UserInfoUrl: "+this.userInfoURL)
                 this.clientID= tenantProfileJson.client_id,
+                logger.verbose("ClientID: "+this.clientID)
                 this.clientSecret =  tenantProfileJson.client_secret,
+                if(this.clientSecret != null){
+                    logger.verbose("ClientSecret: --present--")
+                }
+                else{
+                    logger.warn("ClientSecret: --absent--")
+                }
                 this.callbackURL = tenantProfileJson.redirect_uri+'/authorization-code/'+sub
+                logger.verbose("CallbackURL: "+this.callbackURL)
             }
             catch(error) {
                 logger.error(error);
@@ -36,9 +49,12 @@ class Tenant {
     }
 
     isExpired(){
+        logger.verbose("Checking if tenant data is expired.")
         if(this.expires === null){
+            logger.verbose("Tenant data set to never expire.")
             return false
         }
+        logger.verbose("Expiry timestamp "+this.expires)
         return new Date() > this.expires
     }
 }

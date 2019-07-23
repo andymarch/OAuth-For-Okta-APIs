@@ -5,7 +5,6 @@ const session = require('express-session')
 const axios = require('axios')
 const bodyParser = require('body-parser')
 const urlencodedParser = bodyParser.urlencoded({ extended: true });
-var methodOverride = require('method-override')
 
 var passport = require('passport');
 var logger = require('./logger')
@@ -70,6 +69,7 @@ function wasDownscoped(scopes){
     var result = false;
     process.env.SCOPES.split(" ").forEach(element => {
         if(!scopes.includes(element)){
+            log.info("Application was not granted scope "+element)
             result = true
         }
     });
@@ -100,6 +100,7 @@ function parseError(error){
 const router = express.Router();
 
 router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
+    logger.verbose("/ requested")
     const requestingTenant = tr.getRequestingTenant(req);
     var userProfile;
     const tokenSet = req.userContext.tokens;
@@ -163,6 +164,7 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
 });
 
 router.get("/editprofile",tr.ensureAuthenticated(), async (req, res, next) => {
+    logger.verbose("/editprofile requested")
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
@@ -183,6 +185,7 @@ router.get("/editprofile",tr.ensureAuthenticated(), async (req, res, next) => {
 });
 
 router.post("/editprofile",tr.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
+    logger.verbose("posted /editprofile")
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
@@ -198,6 +201,7 @@ router.post("/editprofile",tr.ensureAuthenticated(), urlencodedParser, async (re
 });
 
 router.get("/addTeamMember/:groupId",tr.ensureAuthenticated(), async (req, res, next) => {
+    logger.verbose("/addTeamMember requested")
     res.render("addTeamMember",{
         user: new UserProfile(),
         groupId: req.params.groupId
@@ -205,6 +209,7 @@ router.get("/addTeamMember/:groupId",tr.ensureAuthenticated(), async (req, res, 
 });
 
 router.post("/addTeamMember/:groupId",tr.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
+    logger.verbose("posted /addTeamMember")
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
@@ -233,11 +238,13 @@ router.post("/addTeamMember/:groupId",tr.ensureAuthenticated(), urlencodedParser
 });
 
 router.get("/addApplication",tr.ensureAuthenticated(), async (req, res, next) => {
+    logger.verbose("/addApplication requested")
     res.render("addApplication",{
-       });
+    });
 });
 
 router.post("/addApplication",tr.ensureAuthenticated(), urlencodedParser, async (req, res, next) => {
+    logger.verbose("posted /addApplication")
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
@@ -278,12 +285,15 @@ router.post("/addApplication",tr.ensureAuthenticated(), urlencodedParser, async 
 });
 
 app.get("/logout", (req, res) => {
+    logger.verbose("/logout requsted")
     let protocol = "http"
     if(req.secure){
+        logger.verbose("Request was secure")
         protocol = "https"
     }
     else if(req.get('x-forwarded-proto')){
         protocol = req.get('x-forwarded-proto').split(",")[0]
+        logger.verbose("Request had forwarded protocol "+protocol)
     }
     const tenant = tr.getRequestingTenant(req).tenant
     const tokenSet = req.userContext.tokens;
@@ -304,31 +314,6 @@ router.get("/error",async (req, res, next) => {
        });
 });
 
-app.use(router)
-/*app.use(methodOverride())
-app.use(logErrors)
-app.use(clientErrorHandler)
-app.use(errorHandler)
-
-app.use(function (req, res, next) {
-    res.status(404);
-    res.render('error', { msg: "Sorry can't find "+req.path})
-})
-
-function logErrors (err, req, res, next) {
-    logger.error(err.stack)
-    next(err)
-  }
-  
-  function clientErrorHandler (err, req, res, next) {
-    res.status(500)
-    res.render('error', { msg: err })
-  }
-
-  function errorHandler (err, req, res, next) {
-    res.status(500)
-    res.render('error', { msg: err })
-  }*/
-  
+app.use(router)  
 
 app.listen(PORT, () => logger.info('app started'));
