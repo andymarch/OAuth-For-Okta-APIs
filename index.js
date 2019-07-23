@@ -69,7 +69,7 @@ function wasDownscoped(scopes){
     var result = false;
     process.env.SCOPES.split(" ").forEach(element => {
         if(!scopes.includes(element)){
-            log.info("Application was not granted scope "+element)
+            logger.info("Application was not granted scope "+element)
             result = true
         }
     });
