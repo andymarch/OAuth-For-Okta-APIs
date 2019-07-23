@@ -11,7 +11,7 @@ class Tenant {
                 this.authorizationURL = tenantProfileJson.okta_org_name+ '/oauth2/v1/authorize',
                 logger.verbose("AuthzUrl: "+this.authorizationURL)
                 this.tokenURL= tenantProfileJson.okta_org_name+'/oauth2/v1/token',
-                logger.verbose("TokenUrl: "+tokenURL)
+                logger.verbose("TokenUrl: "+this.tokenURL)
                 this.userInfoURL= tenantProfileJson.okta_org_name+'/oauth2/v1/userinfo',
                 logger.verbose("UserInfoUrl: "+this.userInfoURL)
                 this.clientID= tenantProfileJson.client_id
