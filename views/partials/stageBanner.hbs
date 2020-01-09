@@ -1,13 +1,17 @@
-{{#if (betaTagged)}}
-<div class="beta">
-    <button class="iconbutton" onclick="swapBetaNotice()">
+{{#if (stageTagged)}}
+<div class="stage">
+    <button class="iconbutton" onclick="swapStageNotice()">
+        {{#ifEquals stageTagged "Beta"}}
         <i class="fas fa-flask"></i>
-        Beta
+        {{else}}
+        <i class="fas fa-rocket"></i>
+        {{/ifEquals}}
+        {{stage}}
         <i class="fas fa-caret-down"></i>
     </button>
-<div id="betanotice">
+<div id="stagenotice">
     <p>
-        This is beta functionality and is subject to change.
+        This is functionality is in {{stage}} and is subject to change.
     If this demo stops working for any reason please create an issue on the
     GitHub project.
     </p>
@@ -20,8 +24,8 @@
 </div>
 </div>
 <script>
-    function swapBetaNotice(){
-        var x = document.getElementById("betanotice");
+    function swapStageNotice(){
+        var x = document.getElementById("stagenotice");
         if (x.style.display === "block") {
             x.style.display = "none";
         } else {

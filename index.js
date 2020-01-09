@@ -24,8 +24,14 @@ app.engine('hbs',  hbs( {
     layoutsDir: __dirname + '/views/layouts/',
     partialsDir: __dirname + '/views/partials/',
     helpers: {
-        betaTagged: () => {
-            return !process.env.SUPPRESSBETA;
+        stageTagged: () => {
+        return !(process.env.SUPPRESSBETA || process.env.SUPPRESS_STAGE)
+        },
+        stage: () => {
+            return "Early Access"
+        },
+        ifEquals: (arg1, arg2, options) => {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
         }
     }
   } ) );
