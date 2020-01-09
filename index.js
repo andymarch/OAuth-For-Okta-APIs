@@ -189,7 +189,7 @@ router.post("/editprofile",tr.ensureAuthenticated(), urlencodedParser, async (re
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        await axios.post(tr.getRequestingTenant(req).tenant+'/api/v1/users/'+req.userContext.userinfo.sub,
+        await axios.post(tr.getRequestingTenant(req).tenant+'/api/v1/users/me',
         {
             profile: {mobilePhone: req.body.number}
         })
