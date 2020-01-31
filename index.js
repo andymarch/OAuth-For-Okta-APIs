@@ -39,6 +39,7 @@ app.engine('hbs',  hbs( {
 app.set('view engine', 'hbs');
 
 app.use('/static', express.static('static'));
+app.use('/scripts', express.static(__dirname + '/node_modules/clipboard/dist/'));
 
 app.use(session({
   cookie: { httpOnly: true },
@@ -115,11 +116,11 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
 
     try {
-        userres = await axios.get(requestingTenant.tenant+'/api/v1/users/'+req.userContext.userinfo.sub)
+        userres = await axios.get(requestingTenant.tenant+'/api/v1/users/me')
         userProfile = new UserProfile(userres.data)
 
         var userManagedGroups = []
-        groupres = await axios.get(requestingTenant.tenant+'/api/v1/users/'+req.userContext.userinfo.sub+'/groups')
+        groupres = await axios.get(requestingTenant.tenant+'/api/v1/users/me/groups')
         groupres.data.forEach(function(element) {
             if(element.profile.name != "Everyone"){
                 userManagedGroups.push(new GroupProfile(element))
@@ -158,6 +159,8 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
     });
 
     res.render("index",{
+        tokenSet: tokenSet,
+        tenant: requestingTenant.tenant,
         authorizations: authorizations,
         user: userProfile,
         groups:userManagedGroups,

@@ -26,6 +26,13 @@
 
     <div class="section">
         <h1>Your Profile</h1>
+        <i class="explainer-icon fas fa-info-circle" onclick="toggle('explainer-me')"></i>
+        <div class="explainer" id="explainer-me" style="display:none">
+        <pre class="code" id="command-me">curl -v -X GET {{tenant}}/api/v1/users/me \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <span class="token">
+{{tokenSet.access_token}}</span>"<i class="copyButton copycontrol far fa-copy" data-clipboard-target="#command-me"></i></pre>
+        </div>
         {{#if user.phoneNumber}}
         <p>Your registered phone number is {{user.phoneNumber}}.</p>
         {{else}}
@@ -34,11 +41,18 @@
         <form action="/editProfile">
             <input type="submit" class="btn-positive" value="Edit" />
         </form>
-    </div>
+    </divid="explainer-me">
 
     {{#if groups}}
     <div class="section">
         <h1>Your Teams</h1>
+        <i class="explainer-icon fas fa-info-circle" onclick="toggle('explainer-groups')"></i>
+        <div class="explainer" id="explainer-groups" style="display:none">
+        <pre class="code" id="command-groups">curl -v -X GET {{tenant}}/api/v1/users/me/groups \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <span class="token">
+{{tokenSet.access_token}}</span>"<i class="copyButton copycontrol far fa-copy" data-clipboard-target="#command-groups"></i></pre>
+        </div>
         {{#each groups}}
             <div> 
                 <h3>{{this.name}}</h3>
@@ -53,7 +67,14 @@
 
     {{#if applications}}
     <div class="section">
-        <h1>Your Applications</h1>
+        <h1>Applications You Manage</h1>
+        <i class="explainer-icon fas fa-info-circle" onclick="toggle('explainer-apps')"></i>
+        <div class="explainer" id="explainer-apps" style="display:none">
+        <pre class="code" id="command-apps">curl -v -X GET {{tenant}}/oauth2/v1/clients \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <span class="token">
+{{tokenSet.access_token}}</span>"<i class="copyButton copycontrol far fa-copy" data-clipboard-target="#command-apps"></i></pre>
+        </div>
         {{#each applications}}
             <div class="application">
                 {{this.name}}
@@ -73,5 +94,24 @@
             <input type="submit" class="btn-positive" value="Logout" />
         </form>
     </div>
+
+<script>
+    function toggle(element) {
+        var x = document.getElementById(element);
+        if (x.style.display === "none") {
+            x.style.display = "flex";
+        } else {
+            x.style.display = "none";
+        }
+    }
+
+  function copyCommand(element) {
+      alert("called with "+ele)
+    var copyText = document.getElementById(element);
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); 
+    document.execCommand("copy");
+    } 
+ </script>
 
 </div>
