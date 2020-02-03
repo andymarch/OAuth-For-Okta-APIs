@@ -181,12 +181,16 @@ router.get("/editprofile",tr.ensureAuthenticated(), async (req, res, next) => {
         userProfile = new UserProfile(response.data)
 
         res.render("editprofile",{
+            tenant: tr.getRequestingTenant(req).tenant,
+            tokenSet: req.userContext.tokens,
             user: userProfile,
             error: req.query.error
         });
     }
     catch(error) {
         res.render("editprofile",{
+            tenant: tr.getRequestingTenant(req).tenant,
+            tokenSet: req.userContext.tokens,
             user: new UserProfile(),
             error: parseError(error)
         });
@@ -212,6 +216,8 @@ router.post("/editprofile",tr.ensureAuthenticated(), urlencodedParser, async (re
 router.get("/addTeamMember/:groupId",tr.ensureAuthenticated(), async (req, res, next) => {
     logger.verbose("/addTeamMember requested")
     res.render("addTeamMember",{
+        tenant: tr.getRequestingTenant(req).tenant,
+        tokenSet: req.userContext.tokens,
         user: new UserProfile(),
         groupId: req.params.groupId
        });
@@ -249,6 +255,8 @@ router.post("/addTeamMember/:groupId",tr.ensureAuthenticated(), urlencodedParser
 router.get("/addApplication",tr.ensureAuthenticated(), async (req, res, next) => {
     logger.verbose("/addApplication requested")
     res.render("addApplication",{
+        tenant: tr.getRequestingTenant(req).tenant,
+        tokenSet: req.userContext.tokens
     });
 });
 

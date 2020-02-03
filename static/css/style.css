@@ -156,7 +156,7 @@ label{
 }
 
 .explainer{
-    width: 75%;
+    width: 50%;
     display: none;
     flex-direction: column;
     align-items: center;

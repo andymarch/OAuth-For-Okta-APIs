@@ -2,6 +2,24 @@
 <div class="content">
     <div class="section">
         <h1>Add Team Member</h1>
+        <i class="explainer-icon fas fa-info-circle" onclick="toggle('explainer-add')"></i>
+        <div class="explainer" id="explainer-add" style="display:none">
+        <pre class="code" id="command-add">curl -v POST {{tenant}}/api/v1/users?activate=true \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <span class="token">
+{{tokenSet.access_token}}</span>" \
+--data-raw '{
+  "profile": {
+    "firstName": "First",
+    "lastName": "Last",
+    "email": "test@test.com",
+    "login": "test@test.com"
+  },
+  "groupIds": [
+    "{{groupId}}"
+  ]
+}'<i class="copyButton copycontrol far fa-copy" data-clipboard-target="#command-add"></i></pre>
+        </div>
         <form action="/addTeamMember/{{groupId}}" method="POST">
         <input type="hidden" value="{{groupId}}"/>
             <div class="section">
