@@ -1,18 +1,17 @@
 <div class="content">
-    <div class="section">
-        <p>Welcome, {{user.name}}!<br>You last logged in {{user.lastLogin}}.</p>
+     <div class="section">
+        <h1>Your Access Token</h1>
+        <pre>{{jwt tokenSet.access_token}}</pre>
     </div>
 
     {{#if wasDownscoped}}
     <div class="section">
-        <h1>Downscoped</h1>
+        <h2><i class="fas fa-exclamation-triangle"></i> Downscoped <i class="fas fa-exclamation-triangle"></i></h2>
         <p>
-        Your access token was downscoped to match your application's available 
-        permissions, so some functions may be unavailable to you.
+        Your access token was downscoped to match the permissions
+        granted to this application by the Okta administrator.
         </p>
-        <h2>Requested Scopes</h2>
-
-
+        <h3>Requested Scopes</h3>
         <table>
             <tr><th>Scope</th><th>Granted</th>
         {{#each authorizations}}
@@ -62,7 +61,7 @@
             </div>
         {{/each}}
     {{else}}
-    <p>Not authorized to view group information.</p>
+    <p>This user is not authorized to view group information.</p>
     </div>
     {{/if}}
 
@@ -86,7 +85,7 @@
             <input type="submit" class="btn-positive"  value="Add Application" />
         </form>
     {{else}}
-    <p>Not authorized to view application information.</p>
+    <p>This user is not authorized to view application information.</p>
     </div>
 
     {{/if}}

@@ -32,6 +32,16 @@ app.engine('hbs',  hbs( {
         },
         ifEquals: (arg1, arg2, options) => {
             return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        },
+        jwt: function (token){
+            var atob = require('atob');
+            if (token != null) {
+                var base64Url = token.split('.')[1];
+                var base64 = base64Url.replace('-', '+').replace('_', '/');
+                return JSON.stringify(JSON.parse(atob(base64)), undefined, '\t');
+            } else {
+                return "Invalid or empty token was parsed"
+            }
         }
     }
   } ) );
