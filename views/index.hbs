@@ -1,8 +1,6 @@
-<div id="BrandLogo"></div>
 <div class="content">
     <div class="section">
-        <p>Welcome, {{user.name}}!</p>
-        <p>You last logged in {{user.lastLogin}}.</p>
+        <p>Welcome, {{user.name}}!<br>You last logged in {{user.lastLogin}}.</p>
     </div>
 
     {{#if wasDownscoped}}
@@ -64,7 +62,7 @@
             </div>
         {{/each}}
     {{else}}
-    Not authorized to view group information
+    <p>Not authorized to view group information.</p>
     </div>
     {{/if}}
 
@@ -88,7 +86,7 @@
             <input type="submit" class="btn-positive"  value="Add Application" />
         </form>
     {{else}}
-    Not authorized to view application information
+    <p>Not authorized to view application information.</p>
     </div>
 
     {{/if}}
