@@ -1,7 +1,18 @@
-<div id="BrandLogo"></div>
 <div class="content">
     <div class="section">
         <h1>Update Your Profile</h1>
+        <i class="explainer-icon fas fa-info-circle" onclick="toggle('explainer-edit')"></i>
+        <div class="explainer" id="explainer-edit" style="display:none">
+        <pre class="code" id="command-edit">curl -v POST {{tenant}}/api/v1/users/me \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <span class="token">
+{{tokenSet.access_token}}</span>" \
+--data-raw '{
+  "profile": {
+    "mobilePhone": "00000000"
+    }
+}'<i class="copyButton copycontrol far fa-copy" data-clipboard-target="#command-edit"></i></pre>
+        </div>
         <form action="/editprofile" method="POST">
             <div class="section">
                 <label for="number">Phone Number</label>

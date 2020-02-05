@@ -33,7 +33,21 @@ html, body, .viewport {
     background-size: contain;
 }
 
+.brandExtension {
+    font-size: x-large;
+}
+
+.brandExtension-above{
+    position: relative;
+    top: 50px;
+}
+
+.brandExtension-below{
+    position: relative;
+    top: -60px;
+}
 .content{
+    width:100%;
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: center;
@@ -47,6 +61,7 @@ p {
 }
 
 .section {
+    width: 100%;
     margin-top: 30px;
     display: flex;
     flex-direction: column;
@@ -54,13 +69,16 @@ p {
     align-items: center;
     font-weight: lighter;
 }
+.section:first-of-type {
+    margin-top: 0px;
+  }
 
 .section h1,h2,h3,h4 {
     margin: 5px;
     text-align: center;
 }
 
-.beta {
+.stage {
     padding: 5px;
     display: flex;
     flex-direction: column;
@@ -71,11 +89,11 @@ p {
     color: black
 }
 
-#betanotice {
+#stagenotice {
     display: none;
 }
 
-#betanotice li{
+#stagenotice li{
         list-style-type: none;
         text-align: center;
 }
@@ -151,4 +169,50 @@ input {
 label{
     color: var(--main-theme-color);
     font-size: smaller;
+}
+
+.explainer{
+    width: 50%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+.explainer-icon{
+    cursor: pointer;
+}
+
+.code {
+    font-family: monospace;
+    font-size: large;
+    color: white;
+    display: inline;
+    width: 100%;
+    text-align: left;
+    background-color: #0b1114;
+    padding: 15px;
+    border: white 1px solid;
+    margin-top: 10px;
+}
+
+.token {
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    width: 15%; 
+}
+
+pre {
+    white-space: -moz-pre-wrap; /* Mozilla, supported since 1999 */
+    white-space: -pre-wrap; /* Opera */
+    white-space: -o-pre-wrap; /* Opera */
+    white-space: pre-wrap; /* CSS3 - Text module (Candidate Recommendation) http://www.w3.org/TR/css3-text/#white-space */
+    word-wrap: break-word; /* IE 5.5+ */
+}
+
+.copycontrol {
+    float: right;   
+    padding-top: 5px;
+    cursor: pointer;
 }

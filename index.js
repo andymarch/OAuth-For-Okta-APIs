@@ -24,8 +24,24 @@ app.engine('hbs',  hbs( {
     layoutsDir: __dirname + '/views/layouts/',
     partialsDir: __dirname + '/views/partials/',
     helpers: {
-        betaTagged: () => {
-            return !process.env.SUPPRESSBETA;
+        stageTagged: () => {
+        return !(process.env.SUPPRESSBETA || process.env.SUPPRESS_STAGE)
+        },
+        stage: () => {
+            return "Early Access"
+        },
+        ifEquals: (arg1, arg2, options) => {
+            return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+        },
+        jwt: function (token){
+            var atob = require('atob');
+            if (token != null) {
+                var base64Url = token.split('.')[1];
+                var base64 = base64Url.replace('-', '+').replace('_', '/');
+                return JSON.stringify(JSON.parse(atob(base64)), undefined, '\t');
+            } else {
+                return "Invalid or empty token was parsed"
+            }
         }
     }
   } ) );
@@ -33,6 +49,7 @@ app.engine('hbs',  hbs( {
 app.set('view engine', 'hbs');
 
 app.use('/static', express.static('static'));
+app.use('/scripts', express.static(__dirname + '/node_modules/clipboard/dist/'));
 
 app.use(session({
   cookie: { httpOnly: true },
@@ -109,11 +126,11 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
 
     try {
-        userres = await axios.get(requestingTenant.tenant+'/api/v1/users/'+req.userContext.userinfo.sub)
+        userres = await axios.get(requestingTenant.tenant+'/api/v1/users/me')
         userProfile = new UserProfile(userres.data)
 
         var userManagedGroups = []
-        groupres = await axios.get(requestingTenant.tenant+'/api/v1/users/'+req.userContext.userinfo.sub+'/groups')
+        groupres = await axios.get(requestingTenant.tenant+'/api/v1/users/me/groups')
         groupres.data.forEach(function(element) {
             if(element.profile.name != "Everyone"){
                 userManagedGroups.push(new GroupProfile(element))
@@ -152,6 +169,8 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
     });
 
     res.render("index",{
+        tokenSet: tokenSet,
+        tenant: requestingTenant.tenant,
         authorizations: authorizations,
         user: userProfile,
         groups:userManagedGroups,
@@ -172,12 +191,16 @@ router.get("/editprofile",tr.ensureAuthenticated(), async (req, res, next) => {
         userProfile = new UserProfile(response.data)
 
         res.render("editprofile",{
+            tenant: tr.getRequestingTenant(req).tenant,
+            tokenSet: req.userContext.tokens,
             user: userProfile,
             error: req.query.error
         });
     }
     catch(error) {
         res.render("editprofile",{
+            tenant: tr.getRequestingTenant(req).tenant,
+            tokenSet: req.userContext.tokens,
             user: new UserProfile(),
             error: parseError(error)
         });
@@ -189,7 +212,7 @@ router.post("/editprofile",tr.ensureAuthenticated(), urlencodedParser, async (re
     const tokenSet = req.userContext.tokens;
     axios.defaults.headers.common['Authorization'] = `Bearer `+tokenSet.access_token
     try {
-        await axios.post(tr.getRequestingTenant(req).tenant+'/api/v1/users/'+req.userContext.userinfo.sub,
+        await axios.post(tr.getRequestingTenant(req).tenant+'/api/v1/users/me',
         {
             profile: {mobilePhone: req.body.number}
         })
@@ -203,6 +226,8 @@ router.post("/editprofile",tr.ensureAuthenticated(), urlencodedParser, async (re
 router.get("/addTeamMember/:groupId",tr.ensureAuthenticated(), async (req, res, next) => {
     logger.verbose("/addTeamMember requested")
     res.render("addTeamMember",{
+        tenant: tr.getRequestingTenant(req).tenant,
+        tokenSet: req.userContext.tokens,
         user: new UserProfile(),
         groupId: req.params.groupId
        });
@@ -240,6 +265,8 @@ router.post("/addTeamMember/:groupId",tr.ensureAuthenticated(), urlencodedParser
 router.get("/addApplication",tr.ensureAuthenticated(), async (req, res, next) => {
     logger.verbose("/addApplication requested")
     res.render("addApplication",{
+        tenant: tr.getRequestingTenant(req).tenant,
+        tokenSet: req.userContext.tokens
     });
 });
 

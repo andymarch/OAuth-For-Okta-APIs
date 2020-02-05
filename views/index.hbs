@@ -1,20 +1,17 @@
-<div id="BrandLogo"></div>
 <div class="content">
-    <div class="section">
-        <p>Welcome, {{user.name}}!</p>
-        <p>You last logged in {{user.lastLogin}}.</p>
+     <div class="section">
+        <h1>Your Access Token</h1>
+        <pre>{{jwt tokenSet.access_token}}</pre>
     </div>
 
     {{#if wasDownscoped}}
     <div class="section">
-        <h1>Downscoped</h1>
+        <h2><i class="fas fa-exclamation-triangle"></i> Downscoped <i class="fas fa-exclamation-triangle"></i></h2>
         <p>
-        Your access token was downscoped to match your application's available 
-        permissions, so some functions may be unavailable to you.
+        Your access token was downscoped to match the permissions
+        granted to this application by the Okta administrator.
         </p>
-        <h2>Requested Scopes</h2>
-
-
+        <h3>Requested Scopes</h3>
         <table>
             <tr><th>Scope</th><th>Granted</th>
         {{#each authorizations}}
@@ -26,6 +23,13 @@
 
     <div class="section">
         <h1>Your Profile</h1>
+        <i class="explainer-icon fas fa-info-circle" onclick="toggle('explainer-me')"></i>
+        <div class="explainer" id="explainer-me" style="display:none">
+        <pre class="code" id="command-me">curl -v -X GET {{tenant}}/api/v1/users/me \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <span class="token">
+{{tokenSet.access_token}}</span>"<i class="copyButton copycontrol far fa-copy" data-clipboard-target="#command-me"></i></pre>
+        </div>
         {{#if user.phoneNumber}}
         <p>Your registered phone number is {{user.phoneNumber}}.</p>
         {{else}}
@@ -34,11 +38,19 @@
         <form action="/editProfile">
             <input type="submit" class="btn-positive" value="Edit" />
         </form>
-    </div>
+    </divid="explainer-me">
 
-    {{#if groups}}
     <div class="section">
         <h1>Your Teams</h1>
+        <i class="explainer-icon fas fa-info-circle" onclick="toggle('explainer-groups')"></i>
+        <div class="explainer" id="explainer-groups" style="display:none">
+        <pre class="code" id="command-groups">curl -v -X GET {{tenant}}/api/v1/users/me/groups \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <span class="token">
+{{tokenSet.access_token}}</span>"<i class="copyButton copycontrol far fa-copy" data-clipboard-target="#command-groups"></i></pre>
+        </div>
+    
+    {{#if groups}}
         {{#each groups}}
             <div> 
                 <h3>{{this.name}}</h3>
@@ -48,12 +60,21 @@
                 </form>
             </div>
         {{/each}}
+    {{else}}
+    <p>This user is not authorized to view group information.</p>
     </div>
     {{/if}}
 
-    {{#if applications}}
     <div class="section">
-        <h1>Your Applications</h1>
+        <h1>Applications You Manage</h1>
+        <i class="explainer-icon fas fa-info-circle" onclick="toggle('explainer-apps')"></i>
+        <div class="explainer" id="explainer-apps" style="display:none">
+        <pre class="code" id="command-apps">curl -v -X GET {{tenant}}/oauth2/v1/clients \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <span class="token">
+{{tokenSet.access_token}}</span>"<i class="copyButton copycontrol far fa-copy" data-clipboard-target="#command-apps"></i></pre>
+        </div>
+    {{#if applications}}
         {{#each applications}}
             <div class="application">
                 {{this.name}}
@@ -63,7 +84,10 @@
         <form action="/addApplication">
             <input type="submit" class="btn-positive"  value="Add Application" />
         </form>
+    {{else}}
+    <p>This user is not authorized to view application information.</p>
     </div>
+
     {{/if}}
 
     <div class="section">
