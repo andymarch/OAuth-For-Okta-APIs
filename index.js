@@ -132,9 +132,7 @@ router.get("/",tr.ensureAuthenticated(), async (req, res, next) => {
         var userManagedGroups = []
         groupres = await axios.get(requestingTenant.tenant+'/api/v1/users/me/groups')
         groupres.data.forEach(function(element) {
-            if(element.profile.name != "Everyone"){
-                userManagedGroups.push(new GroupProfile(element))
-            }
+            userManagedGroups.push(new GroupProfile(element))
         });
         if(userManagedGroups.length == 0){
             userManagedGroups = null;
